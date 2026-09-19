@@ -1,0 +1,19 @@
+{
+    "EventSourceMappings": [
+        {
+            "UUID": "138e4f45-3d45-4a92-ae77-cd00954f63a3",
+            "BatchSize": 1,
+            "MaximumBatchingWindowInSeconds": 0,
+            "EventSourceArn": "arn:aws:sqs:ap-south-1:131912110087:backblaze-dev-s3-events",
+            "MetricsConfig": {
+                "Metrics": []
+            },
+            "FunctionArn": "arn:aws:lambda:ap-south-1:131912110087:function:backblaze-dev-s3-event-handler",
+            "LastModified": "2026-09-16T20:17:17.348000+05:30",
+            "State": "Enabled",
+            "StateTransitionReason": "USER_INITIATED",
+            "FunctionResponseTypes": [],
+            "EventSourceMappingArn": "arn:aws:lambda:ap-south-1:131912110087:event-source-mapping:138e4f45-3d45-4a92-ae77-cd00954f63a3"
+        }
+    ]
+}

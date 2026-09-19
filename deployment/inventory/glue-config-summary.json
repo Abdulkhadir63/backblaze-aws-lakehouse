@@ -1,0 +1,82 @@
+[
+    {
+        "Name":  "bronze_ingestion",
+        "GlueVersion":  "6.0",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  5,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/full-load/bronze/bronze_ingestion.py"
+    },
+    {
+        "Name":  "bronze_layer",
+        "GlueVersion":  "5.1",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  2,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/incremental-load/bronze/bronze_layer.py"
+    },
+    {
+        "Name":  "data_quality_check",
+        "GlueVersion":  "6.0",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  4,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/full-load/data_quality_check/data_quality_check.py"
+    },
+    {
+        "Name":  "data_quality_layer",
+        "GlueVersion":  "5.1",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  2,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/incremental-load/data_quality_check/data_quality_layer.py"
+    },
+    {
+        "Name":  "gold_analytics_layer",
+        "GlueVersion":  "6.0",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  10,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/incremental-load/gold/gold_analytics_layer.py"
+    },
+    {
+        "Name":  "gold_layer",
+        "GlueVersion":  "6.0",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  4,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/full-load/gold/gold_layer.py"
+    },
+    {
+        "Name":  "silver_cleaned",
+        "GlueVersion":  "5.1",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  4,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/full-load/silver/silver_cleaned.py"
+    },
+    {
+        "Name":  "silver_layer",
+        "GlueVersion":  "5.1",
+        "WorkerType":  "G.1X",
+        "NumberOfWorkers":  2,
+        "MaxRetries":  0,
+        "Timeout":  480,
+        "Role":  "arn:aws:iam::131912110087:role/Glue-S3-Access-Role",
+        "ScriptLocation":  "s3://backblaze-de-lakehouse-project/glue_scripts/scripts/incremental-load/silver/silver_layer.py"
+    }
+]

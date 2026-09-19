@@ -1,0 +1,604 @@
+schema_name: drivestats
+schema_version: 1.0
+description: Canonical Silver schema for the 2013 Backblaze Drive Stats baseline.
+
+columns:
+  - name: snapshot_date
+    source_column: date
+    datatype: Date
+    nullable: false
+    description: Daily observation date supplied by Backblaze.
+    business_meaning: Point in time associated with the drive health observation.
+
+  - name: drive_serial_number
+    source_column: serial_number
+    datatype: string
+    nullable: false
+    description: Physical drive serial number supplied by Backblaze.
+    business_meaning: Identifier used to track an individual physical drive.
+
+  - name: drive_model
+    source_column: model
+    datatype: string
+    nullable: false
+    description: Drive model identifier supplied by Backblaze.
+    business_meaning: Identifies the hardware model being observed.
+
+  - name: capacity_bytes
+    source_column: capacity_bytes
+    datatype: bigint
+    nullable: true
+    description: Drive capacity expressed in bytes.
+    business_meaning: Physical storage capacity of the drive.
+
+  - name: failure_flag
+    source_column: failure
+    datatype: int
+    nullable: false
+    description: Drive failure indicator supplied by Backblaze.
+    business_meaning: Indicates whether the drive was reported as failed for the observation.
+
+  - name: smart_1_normalized
+    source_column: smart_1_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 1 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 1.
+
+  - name: smart_1_raw
+    source_column: smart_1_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 1 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 1.
+
+  - name: smart_2_normalized
+    source_column: smart_2_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 2 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 2.
+
+  - name: smart_2_raw
+    source_column: smart_2_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 2 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 2.
+
+  - name: smart_3_normalized
+    source_column: smart_3_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 3 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 3.
+
+  - name: smart_3_raw
+    source_column: smart_3_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 3 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 3.
+
+  - name: smart_4_normalized
+    source_column: smart_4_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 4 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 4.
+
+  - name: smart_4_raw
+    source_column: smart_4_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 4 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 4.
+
+  - name: smart_5_normalized
+    source_column: smart_5_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 5 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 5.
+
+  - name: smart_5_raw
+    source_column: smart_5_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 5 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 5.
+
+  - name: smart_7_normalized
+    source_column: smart_7_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 7 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 7.
+
+  - name: smart_7_raw
+    source_column: smart_7_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 7 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 7.
+
+  - name: smart_8_normalized
+    source_column: smart_8_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 8 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 8.
+
+  - name: smart_8_raw
+    source_column: smart_8_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 8 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 8.
+
+  - name: smart_9_normalized
+    source_column: smart_9_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 9 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 9.
+
+  - name: smart_9_raw
+    source_column: smart_9_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 9 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 9.
+
+  - name: smart_10_normalized
+    source_column: smart_10_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 10 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 10.
+
+  - name: smart_10_raw
+    source_column: smart_10_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 10 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 10.
+
+  - name: smart_11_normalized
+    source_column: smart_11_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 11 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 11.
+
+  - name: smart_11_raw
+    source_column: smart_11_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 11 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 11.
+
+  - name: smart_12_normalized
+    source_column: smart_12_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 12 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 12.
+
+  - name: smart_12_raw
+    source_column: smart_12_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 12 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 12.
+
+  - name: smart_13_normalized
+    source_column: smart_13_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 13 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 13.
+
+  - name: smart_13_raw
+    source_column: smart_13_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 13 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 13.
+
+  - name: smart_15_normalized
+    source_column: smart_15_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 15 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 15.
+
+  - name: smart_15_raw
+    source_column: smart_15_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 15 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 15.
+
+  - name: smart_183_normalized
+    source_column: smart_183_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 183 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 183.
+
+  - name: smart_183_raw
+    source_column: smart_183_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 183 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 183.
+
+  - name: smart_184_normalized
+    source_column: smart_184_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 184 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 184.
+
+  - name: smart_184_raw
+    source_column: smart_184_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 184 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 184.
+
+  - name: smart_187_normalized
+    source_column: smart_187_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 187 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 187.
+
+  - name: smart_187_raw
+    source_column: smart_187_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 187 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 187.
+
+  - name: smart_188_normalized
+    source_column: smart_188_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 188 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 188.
+
+  - name: smart_188_raw
+    source_column: smart_188_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 188 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 188.
+
+  - name: smart_189_normalized
+    source_column: smart_189_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 189 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 189.
+
+  - name: smart_189_raw
+    source_column: smart_189_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 189 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 189.
+
+  - name: smart_190_normalized
+    source_column: smart_190_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 190 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 190.
+
+  - name: smart_190_raw
+    source_column: smart_190_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 190 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 190.
+
+  - name: smart_191_normalized
+    source_column: smart_191_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 191 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 191.
+
+  - name: smart_191_raw
+    source_column: smart_191_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 191 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 191.
+
+  - name: smart_192_normalized
+    source_column: smart_192_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 192 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 192.
+
+  - name: smart_192_raw
+    source_column: smart_192_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 192 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 192.
+
+  - name: smart_193_normalized
+    source_column: smart_193_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 193 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 193.
+
+  - name: smart_193_raw
+    source_column: smart_193_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 193 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 193.
+
+  - name: smart_194_normalized
+    source_column: smart_194_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 194 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 194.
+
+  - name: smart_194_raw
+    source_column: smart_194_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 194 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 194.
+
+  - name: smart_195_normalized
+    source_column: smart_195_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 195 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 195.
+
+  - name: smart_195_raw
+    source_column: smart_195_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 195 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 195.
+
+  - name: smart_196_normalized
+    source_column: smart_196_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 196 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 196.
+
+  - name: smart_196_raw
+    source_column: smart_196_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 196 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 196.
+
+  - name: smart_197_normalized
+    source_column: smart_197_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 197 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 197.
+
+  - name: smart_197_raw
+    source_column: smart_197_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 197 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 197.
+
+  - name: smart_198_normalized
+    source_column: smart_198_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 198 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 198.
+
+  - name: smart_198_raw
+    source_column: smart_198_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 198 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 198.
+
+  - name: smart_199_normalized
+    source_column: smart_199_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 199 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 199.
+
+  - name: smart_199_raw
+    source_column: smart_199_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 199 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 199.
+
+  - name: smart_200_normalized
+    source_column: smart_200_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 200 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 200.
+
+  - name: smart_200_raw
+    source_column: smart_200_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 200 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 200.
+
+  - name: smart_201_normalized
+    source_column: smart_201_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 201 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 201.
+
+  - name: smart_201_raw
+    source_column: smart_201_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 201 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 201.
+
+  - name: smart_223_normalized
+    source_column: smart_223_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 223 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 223.
+
+  - name: smart_223_raw
+    source_column: smart_223_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 223 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 223.
+
+  - name: smart_225_normalized
+    source_column: smart_225_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 225 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 225.
+
+  - name: smart_225_raw
+    source_column: smart_225_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 225 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 225.
+
+  - name: smart_240_normalized
+    source_column: smart_240_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 240 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 240.
+
+  - name: smart_240_raw
+    source_column: smart_240_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 240 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 240.
+
+  - name: smart_241_normalized
+    source_column: smart_241_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 241 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 241.
+
+  - name: smart_241_raw
+    source_column: smart_241_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 241 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 241.
+
+  - name: smart_242_normalized
+    source_column: smart_242_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 242 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 242.
+
+  - name: smart_242_raw
+    source_column: smart_242_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 242 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 242.
+
+  - name: smart_250_normalized
+    source_column: smart_250_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 250 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 250.
+
+  - name: smart_250_raw
+    source_column: smart_250_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 250 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 250.
+
+  - name: smart_251_normalized
+    source_column: smart_251_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 251 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 251.
+
+  - name: smart_251_raw
+    source_column: smart_251_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 251 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 251.
+
+  - name: smart_252_normalized
+    source_column: smart_252_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 252 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 252.
+
+  - name: smart_252_raw
+    source_column: smart_252_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 252 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 252.
+
+  - name: smart_254_normalized
+    source_column: smart_254_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 254 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 254.
+
+  - name: smart_254_raw
+    source_column: smart_254_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 254 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 254.
+
+  - name: smart_255_normalized
+    source_column: smart_255_normalized
+    datatype: int
+    nullable: true
+    description: Normalized SMART attribute 255 value supplied by Backblaze.
+    business_meaning: Normalized SMART measurement for attribute 255.
+
+  - name: smart_255_raw
+    source_column: smart_255_raw
+    datatype: bigint
+    nullable: true
+    description: Raw SMART attribute 255 value supplied by Backblaze.
+    business_meaning: Raw SMART measurement for attribute 255.
+
+mapping_rules:
+  missing_source_column: create_null
+  source_values_in_bronze: string
+  target_types_enforced_in_silver: true
