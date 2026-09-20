@@ -18,7 +18,8 @@ resource "aws_iam_role" "github_actions_artifact" {
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-            "token.actions.githubusercontent.com:sub" = "repo:Abdulkhadir63/backblaze-aws-lakehouse:ref:refs/heads/main"
+
+            "token.actions.githubusercontent.com:sub" = "repo:Abdulkhadir63@307916668/backblaze-aws-lakehouse@1376982195:ref:refs/heads/main"
           }
         }
       }

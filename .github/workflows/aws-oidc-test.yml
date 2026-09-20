@@ -5,6 +5,8 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 permissions:
   contents: read
   id-token: write
@@ -47,7 +49,7 @@ jobs:
           echo "Calling AWS STS AssumeRoleWithWebIdentity..."
 
           CREDS=$(aws sts assume-role-with-web-identity \
-            --role-arn "arn:aws:iam::131912110087:role/backblaze-dev-github-actions-artifact-role" \
+            --role-arn "arn:aws:iam::131912110087:role/backblaze-dev-github-oidc-diagnostic" \
             --role-session-name "DirectOIDCTest-${GITHUB_RUN_ID}" \
             --web-identity-token "$TOKEN")
 
