@@ -1,10 +1,6 @@
-name: AWS OIDC Direct STS Test
+name: AWS OIDC Diagnostic
 
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
 
 permissions:
@@ -16,48 +12,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+      - name: Configure AWS credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::131912110087:role/backblaze-dev-github-oidc-diagnostic
+          aws-region: ap-south-1
+          audience: sts.amazonaws.com
 
-      - name: Direct STS AssumeRoleWithWebIdentity test
-        shell: bash
+      - name: Verify AWS identity
         run: |
-          TOKEN=$(python3 - <<'PY'
-          import os
-          import json
-          import urllib.request
-
-          token_url = os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
-          separator = "&" if "?" in token_url else "?"
-
-          request = urllib.request.Request(
-              f"{token_url}{separator}audience=sts.amazonaws.com"
-          )
-
-          request.add_header(
-              "Authorization",
-              f"Bearer {os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']}"
-          )
-
-          response = urllib.request.urlopen(request)
-          data = json.load(response)
-
-          print(data["value"])
-          PY
-          )
-
-          echo "Calling AWS STS AssumeRoleWithWebIdentity..."
-
-          CREDS=$(aws sts assume-role-with-web-identity \
-            --role-arn "arn:aws:iam::131912110087:role/backblaze-dev-github-oidc-diagnostic" \
-            --role-session-name "DirectOIDCTest-${GITHUB_RUN_ID}" \
-            --web-identity-token "$TOKEN")
-
-          echo "Direct STS AssumeRoleWithWebIdentity succeeded."
-
-          export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r '.Credentials.AccessKeyId')
-          export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.Credentials.SecretAccessKey')
-          export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r '.Credentials.SessionToken')
-
-          echo "Verifying assumed role identity..."
+          echo "AWS OIDC authentication succeeded."
           aws sts get-caller-identity
