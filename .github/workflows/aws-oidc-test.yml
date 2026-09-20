@@ -1,4 +1,4 @@
-name: AWS OIDC Test
+name: AWS OIDC Direct STS Test
 
 on:
   push:
@@ -17,13 +17,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
 
-      - name: Debug GitHub OIDC claims
+      - name: Direct STS AssumeRoleWithWebIdentity test
         shell: bash
         run: |
-          python3 - <<'PY'
+          TOKEN=$(python3 - <<'PY'
           import os
           import json
-          import base64
           import urllib.request
 
           token_url = os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
@@ -41,28 +40,22 @@ jobs:
           response = urllib.request.urlopen(request)
           data = json.load(response)
 
-          token = data["value"]
-          payload = token.split(".")[1]
-          payload += "=" * (-len(payload) % 4)
-
-          claims = json.loads(
-              base64.urlsafe_b64decode(payload)
+          print(data["value"])
+          PY
           )
 
-          print(f"sub: {claims.get('sub')}")
-          print(f"aud: {claims.get('aud')}")
-          print(f"repository_id: {claims.get('repository_id')}")
-          print(f"repository_owner_id: {claims.get('repository_owner_id')}")
-          PY
+          echo "Calling AWS STS AssumeRoleWithWebIdentity..."
 
-      - name: Configure AWS credentials with OIDC
-        uses: aws-actions/configure-aws-credentials@v6.3.0
-        with:
-          role-to-assume: arn:aws:iam::131912110087:role/backblaze-dev-github-actions-artifact-role
-          aws-region: ap-south-1
-          role-session-name: GitHubActionsOIDCTest-${{ github.run_id }}
-          allowed-account-ids: 131912110087
+          CREDS=$(aws sts assume-role-with-web-identity \
+            --role-arn "arn:aws:iam::131912110087:role/backblaze-dev-github-actions-artifact-role" \
+            --role-session-name "DirectOIDCTest-${GITHUB_RUN_ID}" \
+            --web-identity-token "$TOKEN")
 
-      - name: Verify AWS identity
-        run: |
+          echo "Direct STS AssumeRoleWithWebIdentity succeeded."
+
+          export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r '.Credentials.AccessKeyId')
+          export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.Credentials.SecretAccessKey')
+          export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r '.Credentials.SessionToken')
+
+          echo "Verifying assumed role identity..."
           aws sts get-caller-identity
