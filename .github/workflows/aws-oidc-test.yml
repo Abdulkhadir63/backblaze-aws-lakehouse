@@ -1,0 +1,30 @@
+name: AWS OIDC Test
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  aws-oidc-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::131912110087:role/backblaze-dev-github-actions-artifact-role
+          aws-region: ap-south-1
+          role-session-name: GitHubActionsOIDCTest-${{ github.run_id }}
+          allowed-account-ids: 131912110087
+
+      - name: Verify AWS identity
+        run: |
+          aws sts get-caller-identity
