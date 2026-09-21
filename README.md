@@ -140,7 +140,7 @@ The complete architecture is represented in the repository as an SVG diagram.
 
 <p align="center">
   <img
-    src="architecture/project%20architecture.svg"
+    src="architecture/project architecuture.svg"
     width="100%"
     alt="Backblaze AWS Lakehouse Architecture"
   />
