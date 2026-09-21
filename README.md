@@ -4,15 +4,27 @@
   <table>
     <tr>
       <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Backblaze-E11B22?style=for-the-badge&logo=backblaze&logoColor=white" alt="Backblaze" height="32"/><br/>
+        <sub><b>Backblaze</b></sub>
+      </td>
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="42" height="42"/><br/>
+        <sub><b>Python</b></sub>
+      </td>
+      <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg" alt="Apache Spark" width="42" height="42"/><br/>
         <sub><b>Apache Spark</b></sub>
+      </td>
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Apache%20Iceberg-008080?style=for-the-badge&logo=apache&logoColor=white" alt="Apache Iceberg" height="32"/><br/>
+        <sub><b>Apache Iceberg</b></sub>
       </td>
       <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" width="48" height="48"/><br/>
         <sub><b>AWS</b></sub>
       </td>
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="Amazon S3" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white" alt="Amazon S3" height="32"/><br/>
         <sub><b>Amazon S3</b></sub>
       </td>
       <td align="center" width="95">
