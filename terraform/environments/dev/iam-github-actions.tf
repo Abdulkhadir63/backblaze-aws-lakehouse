@@ -46,15 +46,29 @@ resource "aws_iam_role_policy" "github_actions_artifact" {
         Resource = aws_s3_bucket.deployment_artifacts.arn
       },
       {
-        Sid    = "UploadLambdaArtifacts"
+        Sid    = "ManageLambdaArtifacts"
         Effect = "Allow"
 
         Action = [
           "s3:PutObject",
-          "s3:AbortMultipartUpload"
+          "s3:AbortMultipartUpload",
+          "s3:GetObject",
+          "s3:GetObjectVersion"
         ]
 
         Resource = "${aws_s3_bucket.deployment_artifacts.arn}/lambda/backblaze-dev-s3-event-handler/*"
+      },
+      {
+        Sid    = "DeployLambdaCode"
+        Effect = "Allow"
+
+        Action = [
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:UpdateFunctionCode"
+        ]
+
+        Resource = "arn:aws:lambda:ap-south-1:131912110087:function:backblaze-dev-s3-event-handler"
       }
     ]
   })
