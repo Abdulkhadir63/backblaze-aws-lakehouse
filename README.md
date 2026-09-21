@@ -1,13 +1,28 @@
-# **BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT**
-
-<p align="center">
-  <img src="https://cdn.simpleicons.org/amazonwebservices/FF9900" width="58" alt="AWS"/>
-  <img src="https://cdn.simpleicons.org/python/3776AB" width="58" alt="Python"/>
-  <img src="https://cdn.simpleicons.org/apacheiceberg/000000" width="58" alt="Apache Iceberg"/>
-  <img src="https://cdn.simpleicons.org/amazonaws/569A31" width="58" alt="Amazon S3"/>
-  <img src="https://cdn.simpleicons.org/terraform/844FBA" width="58" alt="Terraform"/>
-  <img src="https://cdn.simpleicons.org/githubactions/2088FF" width="58" alt="GitHub Actions"/>
-</p>
+# **BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT** 
+<center>
+<table border="0">
+  <tr>
+    <td align="center" width="90">
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg" alt="Spark" width="40" height="40"/><br/>
+      <sub><b>Spark</b></sub>
+    </td>
+    <td align="center" width="90">
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" width="45" height="45"/><br/>
+      <sub><b>AWS S3</b></sub>
+    </td>
+    <td align="center" width="95">
+      <img src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg" alt="AWS IAM" width="40" height="40"/><br/>
+      <sub><b>AWS IAM</b></sub>
+    </td>
+    </td>
+    <td align="center" width="90">
+      <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg" alt="GH Actions" width="40" height="40"/><br/>
+      <sub><b>GH Actions</b></sub>
+    </td>
+  </tr>
+</table>
+  </center>
+---
 
 <p align="center">
   <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
