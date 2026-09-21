@@ -1318,7 +1318,7 @@ Bronze
 → Durable ingestion
 
 Silver
-→ Standardization and transformation
+→ Standardization transformation and Quarentine bad records
 
 Data Quality
 → Validation
