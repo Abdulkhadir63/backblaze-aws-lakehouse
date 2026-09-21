@@ -132,27 +132,13 @@ The data plane is responsible for moving and transforming data.
 The control plane is responsible for deciding what should be processed, controlling the workflow, tracking processing state, and handling failures and resume logic.
 
 The complete system is:
-
-```text
-                    CONTROL PLANE
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│  S3 Event → SQS → Lambda → DynamoDB → Step Functions  │
-│                                              ↓          │
-│                                            Glue         │
-│                                                         │
-└───────────────────────────────────────────┬─────────────┘
-                                            │
-                                            ↓
-                    DATA PLANE
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│        S3 RAW → Bronze → Silver → DQ → Gold            │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
-The control plane and data plane have different responsibilities, but they work together as one pipeline.
+<p align="center">
+  <img
+    src="architecture/project architecture.svg"
+    width="100%"
+    alt="Backblaze AWS Lakehouse Architecture"
+  />
+</p>
 
 ---
 
