@@ -135,7 +135,7 @@ The project first starts with the historical Backblaze data.
 The current backfill contains:
 
 ```text
-4,642  historical files
+4,642  historical csv files
 ```
 
 and around:
