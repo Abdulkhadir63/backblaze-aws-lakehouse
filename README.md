@@ -133,7 +133,7 @@ The project therefore begins with a historical backfill.
 The current backfill scope is:
 
 ```text
-228 historical files
+229 GB historical Data
 ```
 
 These files represent the data that must first be loaded into the lakehouse.
@@ -141,7 +141,7 @@ These files represent the data that must first be loaded into the lakehouse.
 The basic idea is:
 
 ```text
-228 Historical Files
+229 GB historical Data
         ↓
      S3 RAW
         ↓
