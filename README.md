@@ -86,11 +86,7 @@ CSV → Spark → Table
 
 # 2. 🔄 From Historical Backfill to an Event-Driven Pipeline
 
-Before looking at individual AWS services, the most important thing to understand is **how this project operates over time**.
-
-This project does not start as an event-driven pipeline on day one.
-
-It starts with a historical backfill.
+This Project starts with a historical backfill.
 
 After the historical data has been loaded, the project changes into an event-driven incremental pipeline that processes new Backblaze CSV files as they arrive.
 
