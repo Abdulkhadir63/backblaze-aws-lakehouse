@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: |
           echo "Checking deployment artifact bucket access..."
-          aws s3api head-bucket \
+          aws s3api get-bucket-location \
             --bucket backblaze-dev-deployment-artifacts-131912110087
 
           echo "S3 deployment artifact bucket access succeeded."
