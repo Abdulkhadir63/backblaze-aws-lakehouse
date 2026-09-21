@@ -1,4 +1,4 @@
-🚀 Backblaze AWS Lakehouse
+BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT
 
 <p align="center">
   <img src="https://cdn.simpleicons.org/amazonaws" width="58" alt="AWS"/>
