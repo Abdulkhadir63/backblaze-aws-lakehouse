@@ -462,33 +462,83 @@ Keep Baseline Updated
 That is how the historical load solves the initial 229 GB data problem while still giving the project a clean path into ongoing daily ingestion.
 ---
 
-# 4. ⚡ Incremental Event-driven Processing
+# 4. ⚡ Incremental Event-Driven Processing
 
-After the historical baseline is established, the project switches to incremental processing.
+After the historical baseline is established, the project moves to incremental processing.
 
-The incremental pipeline is event-driven.
+At this point, the problem is different from the historical backfill.
 
-A new source file arriving in the RAW S3 location generates an S3 `ObjectCreated` event.
+The historical pipeline processes data that already exists.
 
-The event then moves through the control plane:
+The incremental pipeline waits for new Backblaze CSV files and starts processing when a new file arrives.
+
+The flow is:
 
 ```text
-S3
- ↓
+New Backblaze CSV
+        ↓
+S3 RAW
+        ↓
 ObjectCreated Event
- ↓
+        ↓
 SQS
- ↓
+        ↓
 Lambda
- ↓
+        ↓
 DynamoDB
- ↓
+        ↓
 Step Functions
- ↓
+        ↓
 AWS Glue
 ```
 
-The incremental processing jobs are:
+The S3 event is configured for the RAW Backblaze path:
+
+```text
+Prefix:
+raw/drivestats/
+
+Suffix:
+.csv
+```
+
+This means a matching CSV object created in the RAW location becomes an input to the event-driven pipeline.
+
+---
+
+## 4.1 📦 Incremental Processing Unit
+
+The incremental pipeline is **file-scoped**.
+
+The new source file is the processing unit.
+
+For example:
+
+```text
+2026-03-31.csv
+```
+
+becomes:
+
+```text
+1 Source File
+      ↓
+1 S3 Event
+      ↓
+1 SQS Message
+      ↓
+1 Processing Unit
+```
+
+The pipeline does not treat the entire RAW dataset as one incremental workload.
+
+It processes the specific file that triggered the event.
+
+---
+
+## 4.2 🔧 Incremental Glue Jobs
+
+The event-driven workflow uses four incremental Glue jobs:
 
 ```text
 bronze_layer
@@ -497,7 +547,49 @@ data_quality_layer
 gold_analytics_layer
 ```
 
-The incremental processing model is file-scoped.
+The processing sequence is:
+
+```text
+New Source File
+        ↓
+bronze_layer
+        ↓
+Bronze
+        ↓
+silver_layer
+        ↓
+Silver
+        ↓
+data_quality_layer
+        ↓
+Data Quality
+        ↓
+gold_analytics_layer
+        ↓
+Gold
+```
+
+Each job has a specific role in the incremental path.
+
+```text
+bronze_layer
+→ Processes the newly arrived source file
+
+silver_layer
+→ Applies the canonical transformation logic
+
+data_quality_layer
+→ Validates the processed data
+
+gold_analytics_layer
+→ Builds the analytical output
+```
+
+---
+
+## 4.3 🎯 Explicit Input Scope
+
+The incremental jobs are also designed with explicit processing scope.
 
 Bronze, Silver, and Data Quality receive:
 
@@ -506,17 +598,81 @@ Bronze, Silver, and Data Quality receive:
 --release_id
 ```
 
+For example:
+
+```text
+--input_path s3://.../raw/drivestats/.../2026-03-31.csv
+--release_id <release_id>
+```
+
+This tells the jobs exactly which source file they are expected to process.
+
 Gold receives:
 
 ```text
 --release_id
 ```
 
-The source file is therefore the processing unit for incremental ingestion.
+because Gold works from the processed release data rather than directly from the raw source file.
 
-The pipeline does not treat the entire RAW dataset as one processing operation.
+The important design decision is:
+
+```text
+Incremental Processing
+→ Process the required file
+
+Not:
+
+→ Scan the entire RAW dataset
+```
 
 ---
+
+## 4.4 🔄 Historical vs Incremental
+
+The two operating modes now have clear responsibilities.
+
+```text
+Historical
+→ Release-oriented backfill
+→ Builds the initial lakehouse baseline
+
+Incremental
+→ File-oriented processing
+→ Keeps the lakehouse updated
+```
+
+The complete project flow is therefore:
+
+```text
+Historical Backfill
+        ↓
+Historical Baseline
+        ↓
+New Backblaze File Arrives
+        ↓
+S3 Event
+        ↓
+SQS
+        ↓
+Lambda
+        ↓
+DynamoDB
+        ↓
+Step Functions
+        ↓
+Incremental Glue
+        ↓
+Bronze
+        ↓
+Silver
+        ↓
+Data Quality
+        ↓
+Gold
+```
+
+This is the event-driven part of the project that takes over after the historical backfill.
 
 # 5. 🗂️ Data Plane
 
