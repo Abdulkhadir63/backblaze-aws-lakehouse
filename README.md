@@ -8,10 +8,6 @@
         <sub><b>Backblaze</b></sub>
       </td>
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="42" height="42"/><br/>
-        <sub><b>Python</b></sub>
-      </td>
-      <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg" alt="Apache Spark" width="42" height="42"/><br/>
         <sub><b>Apache Spark</b></sub>
       </td>
