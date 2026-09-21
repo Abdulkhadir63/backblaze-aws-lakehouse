@@ -913,6 +913,7 @@ Canonical schema handling
 Silver Layer also includes quarantine handling.
 This means invalid records do not have to simply disappear.
 They can be isolated with the information needed to understand why they were rejected.
+
 Schema differences between releases
 ```
 
