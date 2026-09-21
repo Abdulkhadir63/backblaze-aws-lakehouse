@@ -1,4 +1,4 @@
-# 🚀 Backblaze AWS Modern Data Lakehouse
+# **BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT**
 
 <p align="center">
   <table>
