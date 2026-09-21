@@ -2794,7 +2794,7 @@ Running Terraform against the wrong AWS account can create or modify infrastruct
 
 ---
 
-## 23.5 🚀 Initialize Terraform
+## 23.5  Initialize Terraform
 
 After cloning the repository and configuring AWS access:
 
@@ -3017,7 +3017,7 @@ It also allows the repository to deploy a specific version of a script and verif
 
 ---
 
-# 24. 🚀 GitHub Actions — CI/CD
+# 24.  GitHub Actions — CI/CD
 
 I use GitHub Actions to deploy the application code to AWS.
 
