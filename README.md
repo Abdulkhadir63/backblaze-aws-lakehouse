@@ -52,7 +52,7 @@
 
 ---
 
-<h2 align="center">📌 What I Built</h2>
+<h2 align="center">Lets Talk About What I Built</h2>
 
 I built an AWS-based data lakehouse for the Backblaze Drive Stats dataset.
 
