@@ -161,65 +161,305 @@ The control plane and data plane have different responsibilities, but they work 
 
 # 3. 🔄 Historical Backfill
 
-The first part of the project is the historical backfill.
+The first major part of this project is the historical backfill.
 
-The Backblaze dataset already contains historical files before the incremental pipeline starts receiving new files.
+Before the event-driven pipeline can handle new files, I first need to bring the existing Backblaze history into the lakehouse.
 
-I therefore built a controlled backfill process to establish the initial lakehouse state.
-
-The historical processing flow is:
+For this project, the historical scope covers the Backblaze data from:
 
 ```text
-Historical Backblaze Data
-        ↓
-      S3 RAW
-        ↓
-      Bronze
-        ↓
-      Silver
-        ↓
-  Data Quality
-        ↓
-      Gold
+2013
+   ↓
+2014
+   ↓
+2015
+   ↓
+2016_Q1
+   ↓
+...
+   ↓
+2026_Q1
 ```
 
-The historical processing is release-oriented.
+The backfill scope I worked with is approximately:
 
-The jobs receive an explicit:
+```text
+228 files
+~229 GB of source data
+```
+
+This gives the project a large historical dataset to build the initial lakehouse state from.
+
+---
+
+## 3.1 📚 Why a Historical Backfill Is Needed
+
+The new-file pipeline only makes sense after the existing history is available.
+
+I therefore separated the problem into two parts:
+
+```text
+Historical Data
+→ Build the initial lakehouse
+
+New Daily Data
+→ Keep the lakehouse updated
+```
+
+Without the backfill, the incremental pipeline would only know about files arriving from the point it was started.
+
+The backfill gives the lakehouse the historical baseline first.
+
+---
+
+## 3.2 📦 Historical Data Scope
+
+The Backblaze source is released over multiple years.
+
+The project starts with the older 2013 data and continues through the later quarterly releases, up to the current historical scope used in this project:
+
+```text
+2013 → 2015
+Annual releases
+
+2016 onward
+Quarterly releases
+
+Project historical scope
+2013 → 2026_Q1
+```
+
+Instead of treating roughly 229 GB as one undifferentiated input, I process the history using explicit release-level scope.
+
+```text
+2013
+2014
+2015
+2016_Q1
+2016_Q2
+...
+2026_Q1
+```
+
+This gives each historical processing run a clear boundary.
+
+---
+
+## 3.3 🎯 How the Backfill Is Controlled
+
+The historical jobs use:
 
 ```text
 --release_id
 ```
 
-This means a historical job works on a clearly defined release instead of automatically reading the entire RAW dataset.
+So a job is told exactly which release it is supposed to process.
 
-The historical Glue jobs are:
+For example:
+
+```text
+--release_id 2013
+```
+
+or:
+
+```text
+--release_id 2016_Q1
+```
+
+The important part is that the Glue job does not simply read the entire RAW dataset.
+
+The processing scope is explicit:
+
+```text
+Selected Release
+      ↓
+Read only that release
+      ↓
+Process it
+      ↓
+Write the result
+```
+
+This keeps the historical pipeline controlled and makes a rerun much easier to reason about.
+
+---
+
+## 3.4 🏗️ Historical Processing Flow
+
+The historical backfill uses the full-load Glue jobs:
 
 ```text
 bronze_ingestion
+        ↓
 silver_cleaned
+        ↓
 data_quality_check
+        ↓
 gold_layer
 ```
 
-The responsibilities are separated by stage.
+The complete flow is:
+
+```text
+Backblaze Historical Release
+        ↓
+      S3 RAW
+        ↓
+bronze_ingestion
+        ↓
+      Bronze
+        ↓
+  silver_cleaned
+        ↓
+      Silver
+        ↓
+data_quality_check
+        ↓
+  Data Quality
+        ↓
+     gold_layer
+        ↓
+      Gold
+```
+
+Each stage has a different responsibility.
 
 ```text
 bronze_ingestion
-→ Loads historical source data into Bronze
+→ Loads the selected historical source data
 
 silver_cleaned
-→ Cleans and standardizes the Bronze data
+→ Applies the canonical cleaning and transformation logic
 
 data_quality_check
-→ Runs validation checks on the processed data
+→ Checks whether the processed data meets the required quality rules
 
 gold_layer
-→ Produces analytical Gold data
+→ Produces the analytical output
 ```
 
-The historical pipeline establishes the initial state of the lakehouse before incremental processing begins.
+---
 
+## 3.5 🔐 Why I Process the History in Release-Level Units
+
+Processing the whole historical dataset as one giant uncontrolled job would make failures and reruns harder to manage.
+
+Instead, the project uses release-level units.
+
+```text
+2013
+   ↓
+Process
+   ↓
+Complete
+
+2014
+   ↓
+Process
+   ↓
+Complete
+
+2015
+   ↓
+Process
+   ↓
+Complete
+
+2016_Q1
+   ↓
+Process
+   ↓
+Complete
+```
+
+This gives each part of the history its own processing boundary.
+
+If a release fails, I can identify exactly which release needs attention instead of treating the entire historical dataset as one failed workload.
+
+---
+
+## 3.6 📊 What This Backfill Achieves
+
+The historical backfill converts the existing Backblaze history into the lakehouse layers used by the project.
+
+Before the backfill:
+
+```text
+Backblaze Historical Data
+        ↓
+Mostly just source files
+```
+
+After the backfill:
+
+```text
+Backblaze Historical Data
+        ↓
+S3 RAW
+        ↓
+Bronze
+        ↓
+Silver
+        ↓
+Data Quality
+        ↓
+Gold
+```
+
+The result is a historical baseline covering the project's:
+
+```text
+2013 → 2026_Q1
+```
+
+scope.
+
+Once that baseline exists, the project no longer needs to repeatedly rebuild the entire historical dataset for every new file.
+
+---
+
+## 3.7 🔄 What Happens After the Backfill
+
+After the historical baseline is complete, the operating model changes.
+
+The project moves from:
+
+```text
+Historical Backfill
+```
+
+to:
+
+```text
+Event-Driven Incremental Processing
+```
+
+The difference is:
+
+```text
+Historical
+→ Process an explicitly selected release
+
+Incremental
+→ Process a newly arrived file
+```
+
+So the historical backfill is not a separate project from the event-driven pipeline.
+
+It is the first stage of the same lakehouse.
+
+```text
+Historical Backfill
+        ↓
+Build Baseline
+        ↓
+Event-Driven Incremental Processing
+        ↓
+Keep Baseline Updated
+```
+
+That is how the historical load solves the initial 229 GB data problem while still giving the project a clean path into ongoing daily ingestion.
 ---
 
 # 4. ⚡ Incremental Event-driven Processing
