@@ -1,0 +1,192 @@
+name: Deploy Lambda
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-south-1
+  AWS_ACCOUNT_ID: "131912110087"
+
+  LAMBDA_FUNCTION_NAME: backblaze-dev-s3-event-handler
+
+  ARTIFACT_BUCKET: backblaze-dev-deployment-artifacts-131912110087
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Validate Lambda source
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f lambda/s3_event_handler/lambda_function.py
+
+          python3 -m py_compile \
+            lambda/s3_event_handler/lambda_function.py
+
+          echo "Lambda source validation succeeded."
+
+      - name: Configure AWS credentials through OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::131912110087:role/backblaze-dev-github-actions-artifact-role
+          aws-region: ap-south-1
+          audience: sts.amazonaws.com
+          allowed-account-ids: "131912110087"
+
+      - name: Verify AWS identity
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          aws sts get-caller-identity
+
+      - name: Build Lambda package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p build
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+
+          source = Path("lambda/s3_event_handler/lambda_function.py")
+          output = Path("build/backblaze-dev-s3-event-handler.zip")
+
+          with zipfile.ZipFile(
+              output,
+              "w",
+              compression=zipfile.ZIP_DEFLATED
+          ) as archive:
+              archive.write(
+                  source,
+                  arcname="lambda_function.py"
+              )
+
+          print(f"Created: {output}")
+          print(f"Size: {output.stat().st_size} bytes")
+          PY
+
+          echo "ZIP contents:"
+          unzip -l build/backblaze-dev-s3-event-handler.zip
+
+      - name: Calculate artifact checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          EXPECTED_CODE_SHA256="$(
+            openssl dgst \
+              -sha256 \
+              -binary \
+              build/backblaze-dev-s3-event-handler.zip \
+            | base64 -w 0
+          )"
+
+          echo "Expected Lambda CodeSha256:"
+          echo "$EXPECTED_CODE_SHA256"
+
+          echo "EXPECTED_CODE_SHA256=$EXPECTED_CODE_SHA256" >> "$GITHUB_ENV"
+
+      - name: Upload immutable artifact to S3
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARTIFACT_KEY="lambda/backblaze-dev-s3-event-handler/${GITHUB_SHA}.zip"
+
+          aws s3 cp \
+            build/backblaze-dev-s3-event-handler.zip \
+            "s3://${ARTIFACT_BUCKET}/${ARTIFACT_KEY}"
+
+          echo "ARTIFACT_KEY=$ARTIFACT_KEY" >> "$GITHUB_ENV"
+
+          echo "Uploaded artifact:"
+          echo "s3://${ARTIFACT_BUCKET}/${ARTIFACT_KEY}"
+
+      - name: Read S3 object version
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION_ID="$(
+            aws s3api head-object \
+              --bucket "$ARTIFACT_BUCKET" \
+              --key "$ARTIFACT_KEY" \
+              --query "VersionId" \
+              --output text
+          )"
+
+          test -n "$VERSION_ID"
+          test "$VERSION_ID" != "None"
+
+          echo "S3 VersionId: $VERSION_ID"
+
+          echo "S3_OBJECT_VERSION=$VERSION_ID" >> "$GITHUB_ENV"
+
+      - name: Deploy Lambda code
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --s3-bucket "$ARTIFACT_BUCKET" \
+            --s3-key "$ARTIFACT_KEY" \
+            --s3-object-version "$S3_OBJECT_VERSION" \
+            --publish \
+            --output json \
+            > build/lambda-deployment.json
+
+          cat build/lambda-deployment.json
+
+      - name: Verify deployed Lambda
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DEPLOYED_VERSION="$(
+            jq -r '.Version' build/lambda-deployment.json
+          )"
+
+          DEPLOYED_CODE_SHA256="$(
+            jq -r '.CodeSha256' build/lambda-deployment.json
+          )"
+
+          echo "Published Lambda version: $DEPLOYED_VERSION"
+          echo "Expected CodeSha256:      $EXPECTED_CODE_SHA256"
+          echo "Deployed CodeSha256:      $DEPLOYED_CODE_SHA256"
+
+          test "$DEPLOYED_VERSION" != "\$LATEST"
+          test "$DEPLOYED_CODE_SHA256" = "$EXPECTED_CODE_SHA256"
+
+          echo "Lambda deployment verification succeeded."
+
+      - name: Verify Lambda configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          aws lambda get-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --query '{
+              FunctionName:FunctionName,
+              Runtime:Runtime,
+              Handler:Handler,
+              Architectures:Architectures,
+              MemorySize:MemorySize,
+              Timeout:Timeout,
+              LastModified:LastModified
+            }' \
+            --output table
