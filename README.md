@@ -12,7 +12,7 @@
         <sub><b>Apache Spark</b></sub>
       </td>
       <td align="center" width="95">
-        <img src="https://img.shields.io/badge/Apache%20Iceberg-008080?style=for-the-badge&logo=apache&logoColor=white" alt="Apache Iceberg" height="32"/><br/>
+       <img src="https://shields.io" alt="Apache Iceberg" height="32"/>
         <sub><b>Apache Iceberg</b></sub>
       </td>
       <td align="center" width="95">
