@@ -1330,3 +1330,1248 @@ Gold
 This is the main purpose of the data plane.
 
 The control plane will handle the question of **when and how this processing should run**.
+# 13. 🎛️ Control Plane
+
+The control plane is the part of the system that manages the lifecycle of a processing request.
+
+It does not exist to transform millions of rows.
+
+Its job is to answer operational questions before, during, and after data processing:
+
+```text
+What file arrived?
+Is the event valid?
+Has this file already been registered?
+What is the current state of this file?
+Which processing run owns it?
+Is the pipeline already processing another file?
+Which workflow should run?
+Which stage should run next?
+What happened if processing fails?
+Has the processing unit completed?
+Can the next processing unit start?
+```
+
+I built the control plane as:
+
+```text
+S3 ObjectCreated
+        ↓
+       SQS
+        ↓
+      Lambda
+        ↓
+    DynamoDB
+        ↓
+  Step Functions
+        ↓
+       Glue
+```
+
+Each service has a separate responsibility.
+
+```text
+S3
+→ Detect that a source object was created
+
+SQS
+→ Buffer the event and provide a retry boundary
+
+Lambda
+→ Validate the event and register the processing work
+
+DynamoDB
+→ Persist processing state and protect against duplicate registration
+
+Step Functions
+→ Claim the processing unit and orchestrate the workflow
+
+Glue
+→ Perform the actual distributed data processing
+```
+
+The important architectural decision is that the control plane does not try to do the data processing itself.
+
+Heavy Spark processing stays in AWS Glue.
+
+Lightweight event handling and state management stay in the control plane.
+
+This prevents the event handler from becoming a large processing application and keeps orchestration logic separate from transformation logic.
+
+<!-- :contentReference[oaicite:0]{index=0} -->
+
+---
+
+# 14. 📨 Amazon SQS
+
+I use Amazon SQS between the S3 event source and Lambda.
+
+The main queue is:
+
+```text
+backblaze-dev-s3-events
+```
+
+The dead-letter queue is:
+
+```text
+backblaze-dev-s3-events-dlq
+```
+
+The SQS part of the control plane is:
+
+```text
+S3
+ ↓
+SQS
+ ↓
+Lambda
+```
+
+## Why I Used SQS
+
+S3 can generate events when source files are created, but I did not connect the event directly to the rest of the processing workflow.
+
+I inserted SQS as a durable event boundary.
+
+This solves several control-plane problems.
+
+### Event Buffering
+
+S3 produces the event and SQS holds it until Lambda processes it.
+
+This means the event is not dependent on Lambda being available at exactly the same moment the S3 object is created.
+
+The control flow becomes:
+
+```text
+S3 produces event
+        ↓
+SQS stores event
+        ↓
+Lambda consumes event
+```
+
+### Decoupling
+
+SQS separates the event producer from the event consumer.
+
+S3 does not need to know how Lambda processes the event.
+
+Lambda does not need to be directly responsible for the S3 event producer.
+
+The two components communicate through the queue.
+
+### Retry Boundary
+
+If Lambda cannot successfully process a message, the message can become available again according to the SQS retry and visibility behavior.
+
+The event therefore has a controlled retry boundary before it reaches the dead-letter queue.
+
+### Dead-letter Handling
+
+Messages that continue to fail can move to:
+
+```text
+backblaze-dev-s3-events-dlq
+```
+
+This prevents an invalid or repeatedly failing event from remaining in the main processing path indefinitely.
+
+The DLQ also gives the control plane a separate place to investigate failed event delivery.
+
+## What SQS Does Not Do
+
+SQS does not:
+
+```text
+Transform the CSV
+Run Spark
+Create Bronze
+Create Silver
+Run Data Quality
+Create Gold
+Store pipeline state
+```
+
+Its responsibility is event transport and buffering.
+
+The control-plane responsibility is therefore:
+
+```text
+S3
+ ↓
+Reliable event handoff
+ ↓
+SQS
+ ↓
+Lambda
+```
+
+The SQS-to-Lambda event source mapping is configured with a batch size of `1`, so the deployed event handler receives one queue message at a time.
+
+<!-- :contentReference[oaicite:1]{index=1} -->
+
+---
+
+# 15. 🔧 AWS Lambda
+
+I use AWS Lambda as the lightweight control handler.
+
+The deployed Lambda is:
+
+```text
+backblaze-dev-s3-event-handler
+```
+
+Lambda is triggered by SQS.
+
+The runtime flow is:
+
+```text
+SQS Message
+      ↓
+Lambda
+      ↓
+Read S3 Event
+      ↓
+Validate Event
+      ↓
+Extract Metadata
+      ↓
+Register File
+      ↓
+Start Step Functions
+```
+
+## Why I Used Lambda
+
+The event arriving from S3 is small control information.
+
+It does not make sense to start a distributed Spark job just to inspect an event and register a file.
+
+Lambda is therefore used for lightweight control-plane work.
+
+The division is:
+
+```text
+Lambda
+→ Small control-plane operations
+
+Glue + Spark
+→ Large-scale data processing
+```
+
+This keeps the Lambda function fast and focused.
+
+It also prevents the Lambda function from becoming responsible for the entire data pipeline.
+
+---
+
+## What Lambda Does
+
+Lambda receives the SQS message and extracts the S3 event contained inside it.
+
+It reads information such as:
+
+```text
+bucket
+object key
+object size
+etag
+event name
+event time
+```
+
+From the object path it also derives information required by the processing workflow:
+
+```text
+release_id
+source file
+source date
+```
+
+The Lambda therefore converts:
+
+```text
+Raw Event
+```
+
+into:
+
+```text
+Validated Processing Information
+```
+
+---
+
+## Event Validation
+
+The incoming event is treated as external input.
+
+The Lambda therefore validates it before creating processing state.
+
+The validation flow is:
+
+```text
+SQS Event
+    ↓
+Parse Event
+    ↓
+Validate Event Structure
+    ↓
+Validate Bucket
+    ↓
+Validate RAW Prefix
+    ↓
+Validate Object
+    ↓
+Extract Processing Metadata
+```
+
+The Lambda checks that the event belongs to the expected S3 environment and expected RAW location.
+
+This prevents unrelated S3 events from entering the Backblaze processing workflow.
+
+An invalid event should stop at this boundary instead of creating a processing unit inside DynamoDB.
+
+---
+
+## File Registration
+
+After validation, Lambda registers the source file in DynamoDB.
+
+The file receives a persistent control-plane identity based on the source object.
+
+Conceptually:
+
+```text
+FILE#<source_file>
+```
+
+This gives the control plane a durable representation of the work item.
+
+The system can then track:
+
+```text
+Which file is this?
+What is its current status?
+Which processing run owns it?
+When did processing start?
+```
+
+Without this record, the workflow would have to infer processing state from other AWS services.
+
+That would make recovery and debugging much harder.
+
+---
+
+## Duplicate-safe Registration
+
+The registration is designed to be idempotent.
+
+The control plane does not assume that one source file will always generate exactly one event.
+
+The logic is:
+
+```text
+First event
+    ↓
+File record does not exist
+    ↓
+Create file record
+```
+
+For a duplicate event:
+
+```text
+Duplicate event
+    ↓
+File record already exists
+    ↓
+Do not create another independent file record
+```
+
+This protects the system from converting duplicate event delivery into duplicate processing work.
+
+The important distinction is:
+
+```text
+Duplicate Event
+≠
+New Processing Unit
+```
+
+The existing file identity remains the same.
+
+The current Lambda implementation also attempts to start the Step Functions workflow when the registration already exists. This is intentional because a Lambda execution could fail after registering the file but before successfully starting Step Functions. Re-attempting the workflow start provides a recovery path for that failure window rather than assuming that duplicate registration means the workflow definitely started.
+
+---
+
+## Lambda Does Not Run Glue Directly
+
+Lambda does not start the Bronze, Silver, Data Quality, and Gold jobs individually.
+
+The responsibility boundary is:
+
+```text
+Lambda
+   ↓
+Start Orchestration
+   ↓
+Step Functions
+   ↓
+Glue Stages
+```
+
+This keeps workflow logic in one place.
+
+It prevents orchestration decisions from being scattered across Lambda code.
+
+The Lambda is therefore the event handler and registration component, not the main orchestrator.
+
+<!-- :contentReference[oaicite:2]{index=2} -->
+
+---
+
+# 16. 🗄️ Amazon DynamoDB
+
+I use DynamoDB as the state store for the control plane.
+
+The table is:
+
+```text
+backblaze-dev-pipeline-control
+```
+
+The project also uses:
+
+```text
+backblaze-processing-queue-index
+```
+
+as the processing queue index.
+
+DynamoDB stores operational pipeline state.
+
+It does not store the main analytical dataset.
+
+The separation is:
+
+```text
+Lakehouse
+→ Stores processed data
+
+DynamoDB
+→ Stores processing state
+```
+
+This distinction is important because the pipeline needs to know what is happening to the work itself, not only what data exists in the lakehouse.
+
+---
+
+## What DynamoDB Solves
+
+The pipeline needs persistent answers to questions such as:
+
+```text
+Has this file already been registered?
+
+What is this file's current status?
+
+Which processing run owns the file?
+
+When did processing start?
+
+Did the file succeed?
+
+Did the file fail?
+
+Is the pipeline currently busy?
+
+Which file currently owns the processing slot?
+```
+
+DynamoDB provides that persistent control-plane state.
+
+---
+
+## File-level State
+
+Each source file receives a persistent record.
+
+The file identity is tied to the source object.
+
+Conceptually:
+
+```text
+FILE#<source_file>
+```
+
+The record can contain processing information such as:
+
+```text
+status
+received_at
+processing_run_id
+error
+source metadata
+```
+
+The important point is that the source file has a state that survives outside the Lambda invocation and outside the Step Functions execution itself.
+
+That persistent state is what makes the processing unit traceable.
+
+---
+
+# 17. 🔐 DynamoDB Provides Idempotency
+
+The control plane uses DynamoDB conditional registration to protect against duplicate processing.
+
+The fundamental problem is that distributed event systems cannot be treated as:
+
+```text
+One file
+=
+One event
+```
+
+The control plane therefore uses the source file as the persistent identity.
+
+The expected behavior is:
+
+```text
+First delivery
+       ↓
+No FILE record
+       ↓
+Create FILE record
+       ↓
+Processing unit registered
+```
+
+A duplicate delivery becomes:
+
+```text
+Duplicate delivery
+       ↓
+FILE record already exists
+       ↓
+No second independent file registration
+```
+
+This prevents duplicate event delivery from automatically becoming duplicate logical work.
+
+The protection happens before the heavy Glue processing begins.
+
+That is important because duplicate detection after Spark processing would already be too late.
+
+The control plane therefore protects the pipeline at the work-registration stage.
+
+<!-- :contentReference[oaicite:3]{index=3} -->
+
+---
+
+# 18. 🔒 Pipeline Processing Ownership
+
+File-level state alone is not enough.
+
+The pipeline also needs to know whether the overall processing slot is already occupied.
+
+For that purpose, the control plane maintains a pipeline-level record:
+
+```text
+PIPELINE#BACKBLAZE
+```
+
+This record represents the state of the processing pipeline itself.
+
+The intended lifecycle is:
+
+```text
+IDLE
+  ↓
+PROCESSING
+  ↓
+SUCCESS
+  ↓
+IDLE
+```
+
+The pipeline-level control record tracks information such as:
+
+```text
+processing_run_id
+active_source_file
+processing_started_at
+status
+```
+
+This gives Step Functions an explicit answer to:
+
+```text
+Is the pipeline currently processing something?
+
+Which file is active?
+
+Which processing run owns that file?
+```
+
+---
+
+# 19. 🎯 Why Processing Ownership Exists
+
+The incremental pipeline is intentionally designed around one active processing unit at a time.
+
+The processing unit is a source file.
+
+Therefore the control plane needs to enforce this relationship:
+
+```text
+Pipeline
+   ↓
+One active processing run
+   ↓
+One claimed source file
+```
+
+The control state prevents the orchestration layer from treating every incoming event as permission to start another independent processing run.
+
+SQS can hold incoming events.
+
+DynamoDB can record their state.
+
+Step Functions can decide when a processing unit can be claimed.
+
+This gives the system a controlled processing queue rather than an uncontrolled collection of simultaneous Glue executions.
+
+---
+
+# 20. 🔀 AWS Step Functions
+
+I use AWS Step Functions as the main orchestration engine.
+
+The state machine is:
+
+```text
+backblaze-dev-file-processing
+```
+
+It is a **Standard Step Functions workflow**.
+
+Step Functions sits between the control state and the Glue processing jobs.
+
+The control flow is:
+
+```text
+DynamoDB
+    ↓
+Step Functions
+    ↓
+Glue
+```
+
+Step Functions is responsible for deciding how the registered processing work moves through the pipeline.
+
+---
+
+## Why I Used Step Functions
+
+I did not put the complete orchestration logic inside Lambda.
+
+That would force Lambda to manage:
+
+```text
+Glue execution
+Job ordering
+Failures
+Retries
+State transitions
+Completion
+Recovery
+```
+
+Instead, Step Functions owns the workflow.
+
+This creates a clear separation:
+
+```text
+Lambda
+→ Handles the event
+
+DynamoDB
+→ Stores the state
+
+Step Functions
+→ Controls the workflow
+
+Glue
+→ Processes the data
+```
+
+This makes the processing lifecycle visible and traceable.
+
+---
+
+# 21. 🧠 Step Functions Determines the Processing Work
+
+When the workflow starts, Step Functions does not blindly launch Glue.
+
+It works with the control-plane state.
+
+The conceptual flow is:
+
+```text
+Start
+  ↓
+Read Control State
+  ↓
+Determine Processing Work
+  ↓
+Find Processing Unit
+  ↓
+Claim Processing Unit
+  ↓
+Run Glue Stages
+```
+
+The important part is that orchestration decisions are based on persistent state.
+
+The workflow is therefore state-aware rather than being a simple:
+
+```text
+Trigger
+  ↓
+Run Glue
+```
+
+pipeline.
+
+---
+
+# 22. 🔒 Step Functions Claims the Processing Unit
+
+Before heavy processing starts, the source file must be claimed.
+
+The claim establishes:
+
+```text
+This processing run owns this file.
+```
+
+The ownership relationship is:
+
+```text
+Pipeline
+   ↓
+Processing Run
+   ↓
+Source File
+```
+
+The control state contains information such as:
+
+```text
+processing_run_id
+active_source_file
+status
+processing_started_at
+```
+
+This becomes important during:
+
+```text
+Debugging
+Failure handling
+Recovery
+State inspection
+```
+
+Without an explicit claim, it would be difficult to determine which workflow owns the active file.
+
+---
+
+# 23. 🥉 Step Functions Controls the Bronze Stage
+
+After the file is claimed, Step Functions starts the incremental Bronze job:
+
+```text
+bronze_layer
+```
+
+The job receives the exact processing scope:
+
+```text
+--input_path
+--release_id
+```
+
+This is important because the control plane has already identified the specific source file.
+
+Step Functions therefore passes the work item into the data plane.
+
+The relationship is:
+
+```text
+Control Plane
+      ↓
+Claimed Source File
+      ↓
+Step Functions
+      ↓
+Glue Bronze
+```
+
+The control plane does not ask Bronze to scan the entire RAW dataset.
+
+It passes the processing scope associated with the claimed file.
+
+---
+
+# 24. ➡️ Step Functions Controls the Processing Sequence
+
+After Bronze completes successfully, Step Functions moves to the next stage.
+
+The incremental workflow is:
+
+```text
+Bronze
+   ↓
+Silver
+   ↓
+Data Quality
+   ↓
+Gold
+```
+
+The control plane therefore enforces stage ordering.
+
+The next stage is not started until the required previous stage has completed successfully.
+
+This prevents the downstream stages from being treated as independent jobs with no dependency relationship.
+
+The orchestration layer owns that dependency chain.
+
+---
+
+# 25. 🧹 Step Functions Controls Silver
+
+After Bronze succeeds, Step Functions starts:
+
+```text
+silver_layer
+```
+
+The job receives:
+
+```text
+--input_path
+--release_id
+```
+
+Silver is part of the data plane, but Step Functions controls when it runs.
+
+This creates a clear responsibility boundary:
+
+```text
+Step Functions
+→ Decides when Silver should execute
+
+Glue + Spark
+→ Performs the Silver transformation
+```
+
+The control plane therefore does not contain the transformation logic.
+
+---
+
+# 26. 🚦 Step Functions Controls Data Quality
+
+After Silver completes, Step Functions starts:
+
+```text
+data_quality_layer
+```
+
+The Data Quality stage acts as a checkpoint before Gold.
+
+This matters because:
+
+```text
+Glue job succeeded
+```
+
+does not automatically mean:
+
+```text
+Processed data is acceptable
+```
+
+The control plane uses the result of the Data Quality stage to determine whether processing can continue toward Gold.
+
+The progression is:
+
+```text
+Silver
+   ↓
+Data Quality
+   ↓
+Gold
+```
+
+This prevents the orchestration layer from treating successful Spark execution as equivalent to successful data validation.
+
+---
+
+# 27. 🥇 Step Functions Controls Gold
+
+When Data Quality succeeds, Step Functions starts:
+
+```text
+gold_analytics_layer
+```
+
+Gold receives:
+
+```text
+--release_id
+```
+
+The control plane therefore completes the processing chain:
+
+```text
+Bronze
+   ↓
+Silver
+   ↓
+Data Quality
+   ↓
+Gold
+```
+
+Gold is the final processing stage in the incremental workflow.
+
+---
+
+# 28. ✅ Successful Completion
+
+When Gold completes successfully, Step Functions enters the success path.
+
+The control state is updated to represent successful completion and the pipeline processing state is released.
+
+The intended lifecycle is:
+
+```text
+IDLE
+  ↓
+PROCESSING
+  ↓
+SUCCESS
+  ↓
+IDLE
+```
+
+The important result is not only that the data processing succeeded.
+
+The control plane must also return to an available state.
+
+The workflow therefore completes two things:
+
+```text
+Data processing completed
++
+Processing ownership released
+```
+
+This allows another registered processing unit to be handled.
+
+---
+
+# 29. ❌ Failure Handling
+
+Failures are handled by the orchestration layer rather than being left as isolated Glue errors.
+
+The control plane retains information about the processing unit and the processing run.
+
+When a stage fails, the system needs to know:
+
+```text
+Which file failed?
+Which processing run failed?
+Which state was active?
+Which stage failed?
+```
+
+This is much more useful than only having:
+
+```text
+Glue Job Failed
+```
+
+because the control plane needs enough information to determine the next recovery action.
+
+---
+
+# 30. 🔄 Resume Processing
+
+The Step Functions workflow contains resume logic for failed processing states.
+
+The intended recovery flow is:
+
+```text
+Failed Processing Unit
+        ↓
+Read Failure State
+        ↓
+Identify Failed Stage
+        ↓
+Resume Appropriate Stage
+        ↓
+Continue Remaining Stages
+```
+
+The reason this matters is that the processing lifecycle is staged.
+
+If an upstream stage already completed successfully, recovery should not automatically treat the entire source file as an unknown new workload.
+
+The control-plane state provides the information required to distinguish:
+
+```text
+New Work
+```
+
+from:
+
+```text
+Previously Registered Work
+```
+
+and:
+
+```text
+Previously Failed Work
+```
+
+This makes recovery state-aware.
+
+---
+
+# 31. ⚠️ Runtime Reliability Finding
+
+During runtime testing, the project exposed an important control-plane failure scenario.
+
+An externally aborted Step Functions execution left the control-plane state as:
+
+```text
+DynamoDB
+→ PROCESSING
+```
+
+while the Step Functions execution was no longer running.
+
+The observed state was effectively:
+
+```text
+No active Step Functions execution
+        +
+DynamoDB still says PROCESSING
+```
+
+This happened because externally aborting a Step Functions execution can bypass the normal workflow cleanup path.
+
+As a result, the normal transition back from:
+
+```text
+PROCESSING
+```
+
+to an available state may not occur.
+
+This is a runtime reconciliation problem.
+
+It is not an infrastructure deployment problem.
+
+The existing resume logic handles failed states, but the recorded project state showed that an externally aborted execution can leave stale `PROCESSING` state that requires explicit reconciliation.
+
+The important engineering lesson from this test is that:
+
+```text
+Workflow state
+```
+
+and:
+
+```text
+Execution state
+```
+
+cannot always be assumed to remain synchronized after every type of termination.
+
+The control plane therefore needs to treat stale processing ownership as a recovery case that must be validated against the actual Step Functions execution and source-file relationship before changing state.
+
+<!-- :contentReference[oaicite:4]{index=4} -->
+
+---
+
+# 32. 🔔 Amazon SNS
+
+I also created the SNS notification infrastructure for the control plane.
+
+The topic is:
+
+```text
+backblaze-dev-pipeline-notifications
+```
+
+SNS provides the notification channel for pipeline events and operational alerts.
+
+Its role is separate from the actual processing workflow.
+
+The current project state has the SNS infrastructure deployed, but notification states were not yet added directly into the Step Functions state machine.
+
+Therefore the current architecture should be understood as:
+
+```text
+SNS
+→ Notification Infrastructure
+```
+
+rather than:
+
+```text
+SNS
+→ Fully integrated Step Functions failure notification path
+```
+
+This distinction is intentional so the README represents what was actually built rather than claiming functionality that is not currently active.
+
+<!-- :contentReference[oaicite:5]{index=5} -->
+
+---
+
+# 33. 🔗 Complete Control Plane Flow
+
+The complete control-plane lifecycle is:
+
+```text
+Source File Arrives
+        ↓
+S3 ObjectCreated Event
+        ↓
+SQS
+        ↓
+Lambda
+        ↓
+Validate Event
+        ↓
+Extract File Metadata
+        ↓
+Register File in DynamoDB
+        ↓
+Protect Against Duplicate Registration
+        ↓
+Start Step Functions
+        ↓
+Read Control State
+        ↓
+Claim Processing Unit
+        ↓
+Run Bronze
+        ↓
+Run Silver
+        ↓
+Run Data Quality
+        ↓
+Run Gold
+        ↓
+Record Success
+        ↓
+Release Processing Ownership
+        ↓
+Return Pipeline to Available State
+```
+
+The control plane therefore solves a different problem from the data plane.
+
+The data plane processes the records.
+
+The control plane manages the lifecycle of the work.
+
+---
+
+# 34. 🎯 What the Control Plane Solves
+
+Without the control plane, the architecture would be much closer to:
+
+```text
+S3
+ ↓
+Trigger Glue
+ ↓
+Process File
+```
+
+That approach would not provide the same level of control over:
+
+```text
+Duplicate event handling
+File registration
+Processing state
+Processing ownership
+Workflow sequencing
+Failure state
+Resume state
+Event buffering
+Dead-letter handling
+Operational traceability
+```
+
+The control plane solves these operational problems by assigning each problem to a specific service.
+
+```text
+S3
+→ Detect source arrival
+
+SQS
+→ Buffer the event
+
+Lambda
+→ Validate and register the work
+
+DynamoDB
+→ Persist state and protect idempotency
+
+Step Functions
+→ Orchestrate and control the workflow
+
+SNS
+→ Provide notification infrastructure
+```
+
+The result is a pipeline where the system knows not only:
+
+```text
+What data should be processed?
+```
+
+but also:
+
+```text
+What work exists?
+What state is that work in?
+Who owns the processing slot?
+What stage is running?
+What happened when processing failed?
+What state must be reconciled before processing can safely continue?
+```
+
+That is the purpose of the control plane in this project.
+
+
+
+
+
+
+
+
+
