@@ -55,12 +55,30 @@
 </p>
 
 ---
+# 1. 📌 What Problem Does This Project Solve?
 
-# 📌 About This Project
+The Backblaze Drive Stats dataset contains large amounts of hard-drive statistics collected over time.
 
-This repository contains a production-oriented AWS data engineering lakehouse built around the **Backblaze Drive Stats** dataset.
+The data is useful for analytics, but building a reliable pipeline around it creates several practical engineering problems.
 
-The project goes beyond a basic:
+The pipeline needs to answer questions such as:
+
+- How do we load a large historical dataset without treating every run like a completely new pipeline?
+- How do we process a new CSV when it arrives without manually starting a Glue job?
+- What happens when the same S3 event is delivered more than once?
+- How do we know which file is currently being processed?
+- How do we prevent two files from being processed at the same time when the pipeline is designed around one active processing unit?
+- Where do we preserve the original source data?
+- Where do we standardize changing source schemas?
+- What happens when records fail validation?
+- How do we coordinate Bronze → Silver → DQ → Gold?
+- What happens when one processing stage fails?
+- How do we resume processing after a failure?
+- How do we deploy infrastructure and application code without manually rebuilding everything?
+
+This project is designed to solve those problems as one system.
+
+The result is not simply:
 
 ```text
 CSV → Spark → Table
