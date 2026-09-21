@@ -1,4 +1,4 @@
-# 🚀 Deployment
+#  Deployment
 
 This project is deployed using two separate mechanisms:
 
