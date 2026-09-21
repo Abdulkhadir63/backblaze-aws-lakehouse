@@ -91,7 +91,7 @@ First, I had to load the historical Backblaze data and build the initial lakehou
 
 After that, the problem changed.
 
-Backblaze keeps providing new CSV data, so I needed a way to process a new file automatically whenever it arrives.
+Backblaze keeps providing new CSV data daily data arriving time is not guaranteed, so I needed a way to process a new file automatically whenever it arrives.
 
 That is why this project has two different processing modes:
 
