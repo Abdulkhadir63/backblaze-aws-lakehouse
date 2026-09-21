@@ -35,3 +35,9 @@ Thumbs.db
 
 # Generated local files
 *.log
+
+# Deployment artifacts
+deployment/artifacts/
+
+# Generated AWS deployment inventory snapshots
+deployment/inventory/*.json
