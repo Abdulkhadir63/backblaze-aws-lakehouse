@@ -4,6 +4,10 @@
   <table>
     <tr>
       <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="42" height="42"/><br/>
+        <sub><b>Python</b></sub>
+      </td>
+      <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg" alt="Apache Spark" width="42" height="42"/><br/>
         <sub><b>Apache Spark</b></sub>
       </td>
@@ -12,7 +16,7 @@
         <sub><b>AWS</b></sub>
       </td>
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original.svg" alt="Amazon S3" width="42" height="42"/><br/>
+        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg" alt="Amazon S3" width="42" height="42"/><br/>
         <sub><b>Amazon S3</b></sub>
       </td>
       <td align="center" width="95">
