@@ -144,24 +144,13 @@ The control plane is responsible for deciding what should be processed, controll
 
 The complete system is:
 
-```text
-                    CONTROL PLANE
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│  S3 Event → SQS → Lambda → DynamoDB → Step Functions  │
-│                                              ↓          │
-│                                            Glue         │
-│                                                         │
-└───────────────────────────────────────────┬─────────────┘
-                                            │
-                                            ↓
-                    DATA PLANE
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│        S3 RAW → Bronze → Silver → DQ → Gold            │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img
+    src="architecture/project architecuture.svg"
+    width="100%"
+    alt="Backblaze AWS Lakehouse Architecture"
+  />
+</p>
 
 The control plane and data plane have different responsibilities, but they work together as one pipeline.
 
