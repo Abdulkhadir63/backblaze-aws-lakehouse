@@ -50,7 +50,7 @@
 <p align="center">
   <a href="DEPLOYMENT.md">📚 Deployment Runbook</a> •
   <a href="architecture/project architecuture.svg">🏗️ Architecture</a> •
-  <a href="dashboard/QuickSight.png">⚙️ Dashboard</a>
+  <a href="dashboard/QuickSight.png">⚙️ Dashboard</a>•
    <a href="dashboard/QuickSight.png">💸 My Cost Analysis of this Project</a>
 </p>
 
