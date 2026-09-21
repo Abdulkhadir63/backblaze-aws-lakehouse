@@ -49,8 +49,8 @@
 
 <p align="center">
   <a href="DEPLOYMENT.md">📚 Deployment Runbook</a> •
-  <a href="architecture/project%20architecture.svg">🏗️ Architecture</a> •
-  <a href="stepfunctions/backblaze_file_processing.asl.json">⚙️ Step Functions</a>
+  <a href="architecture/project architecuture.svg">🏗️ Architecture</a> •
+  <a href="dashboard/QuickSight.png">⚙️ Dashboard</a>
 </p>
 
 ---
