@@ -1,0 +1,246 @@
+﻿name: Deploy Glue
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: ap-south-1
+  AWS_ACCOUNT_ID: "131912110087"
+  ARTIFACT_BUCKET: backblaze-dev-deployment-artifacts-131912110087
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Validate Glue source
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t scripts < <(
+            find glue_scripts/scripts -type f -name '*.py' -print | sort
+          )
+
+          test "${#scripts[@]}" -eq 8
+
+          for script in "${scripts[@]}"; do
+            echo "Validating: $script"
+            python3 -m py_compile "$script"
+          done
+
+          echo "All Glue scripts passed syntax validation."
+
+      - name: Configure AWS credentials through OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: arn:aws:iam::131912110087:role/backblaze-dev-github-actions-artifact-role
+          aws-region: ap-south-1
+          audience: sts.amazonaws.com
+          allowed-account-ids: "131912110087"
+
+      - name: Verify AWS identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          aws sts get-caller-identity
+
+      - name: Deploy Glue scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p build
+
+          ARTIFACT_PREFIX="glue/${GITHUB_SHA}/${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}"
+          MANIFEST="build/glue-deployment-manifest.json"
+
+          jobs=(
+            "bronze_ingestion|glue_scripts/scripts/full-load/bronze/bronze_ingestion.py"
+            "silver_cleaned|glue_scripts/scripts/full-load/silver/silver_cleaned.py"
+            "data_quality_check|glue_scripts/scripts/full-load/data_quality_check/data_quality_check.py"
+            "gold_layer|glue_scripts/scripts/full-load/gold/gold_layer.py"
+            "bronze_layer|glue_scripts/scripts/incremental-load/bronze/bronze_layer.py"
+            "silver_layer|glue_scripts/scripts/incremental-load/silver/silver_layer.py"
+            "data_quality_layer|glue_scripts/scripts/incremental-load/data_quality_check/data_quality_layer.py"
+            "gold_analytics_layer|glue_scripts/scripts/incremental-load/gold/gold_analytics_layer.py"
+          )
+
+          echo "[" > "$MANIFEST"
+          first=true
+
+          for entry in "${jobs[@]}"; do
+            IFS='|' read -r job source <<< "$entry"
+
+            relative_path="${source#glue_scripts/scripts/}"
+            artifact_key="${ARTIFACT_PREFIX}/${relative_path}"
+            artifact_uri="s3://${ARTIFACT_BUCKET}/${artifact_key}"
+
+            sha256="$(
+              sha256sum "$source" | awk '{print $1}'
+            )"
+
+            echo
+            echo "============================================"
+            echo "Glue job:       $job"
+            echo "Source:         $source"
+            echo "Artifact:       $artifact_uri"
+            echo "SHA256:         $sha256"
+            echo "============================================"
+
+            aws s3 cp \
+              "$source" \
+              "$artifact_uri"
+
+            version_id="$(
+              aws s3api head-object \
+                --bucket "$ARTIFACT_BUCKET" \
+                --key "$artifact_key" \
+                --query "VersionId" \
+                --output text
+            )"
+
+            test -n "$version_id"
+            test "$version_id" != "None"
+
+            existing_job="$(
+              aws glue get-job \
+                --job-name "$job" \
+                --output json
+            )"
+
+            job_update="$(
+              printf '%s' "$existing_job" \
+                | jq \
+                  --arg script_location "$artifact_uri" \
+                  '.Job
+                   | {
+                       JobMode,
+                       JobRunQueuingEnabled,
+                       Description,
+                       Role,
+                       ExecutionProperty,
+                       Command,
+                       DefaultArguments,
+                       NonOverridableArguments,
+                       Connections,
+                       MaxRetries,
+                       Timeout,
+                       WorkerType,
+                       NumberOfWorkers,
+                       SecurityConfiguration,
+                       NotificationProperty,
+                       GlueVersion,
+                       ExecutionClass
+                     }
+                   | with_entries(select(.value != null))
+                   | .Command.ScriptLocation = $script_location'
+            )"
+
+            aws glue update-job \
+              --job-name "$job" \
+              --job-update "$job_update" \
+              --output json \
+              > "build/${job}-update.json"
+
+            deployed_location="$(
+              aws glue get-job \
+                --job-name "$job" \
+                --query "Job.Command.ScriptLocation" \
+                --output text
+            )"
+
+            test "$deployed_location" = "$artifact_uri"
+
+            record="$(
+              jq -n \
+                --arg job "$job" \
+                --arg source "$source" \
+                --arg artifact "$artifact_uri" \
+                --arg version_id "$version_id" \
+                --arg sha256 "$sha256" \
+                '{
+                  job: $job,
+                  source: $source,
+                  artifact: $artifact,
+                  s3_version_id: $version_id,
+                  sha256: $sha256
+                }'
+            )"
+
+            if [[ "$first" == true ]]; then
+              first=false
+            else
+              echo "," >> "$MANIFEST"
+            fi
+
+            printf "%s" "$record" >> "$MANIFEST"
+
+            echo
+            echo "Deployment verified for $job"
+            echo "S3 VersionId: $version_id"
+            echo "Glue ScriptLocation: $deployed_location"
+          done
+
+          echo
+          echo "]" >> "$MANIFEST"
+
+          echo
+          echo "=== DEPLOYMENT MANIFEST ==="
+          cat "$MANIFEST"
+
+          manifest_key="${ARTIFACT_PREFIX}/glue-deployment-manifest.json"
+
+          aws s3 cp \
+            "$MANIFEST" \
+            "s3://${ARTIFACT_BUCKET}/${manifest_key}"
+
+          echo
+          echo "Manifest uploaded:"
+          echo "s3://${ARTIFACT_BUCKET}/${manifest_key}"
+
+      - name: Final Glue verification
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          jobs=(
+            "bronze_ingestion|full-load/bronze/bronze_ingestion.py"
+            "silver_cleaned|full-load/silver/silver_cleaned.py"
+            "data_quality_check|full-load/data_quality_check/data_quality_check.py"
+            "gold_layer|full-load/gold/gold_layer.py"
+            "bronze_layer|incremental-load/bronze/bronze_layer.py"
+            "silver_layer|incremental-load/silver/silver_layer.py"
+            "data_quality_layer|incremental-load/data_quality_check/data_quality_layer.py"
+            "gold_analytics_layer|incremental-load/gold/gold_analytics_layer.py"
+          )
+
+          for entry in "${jobs[@]}"; do
+            IFS='|' read -r job relative_path <<< "$entry"
+
+            expected_location="s3://${ARTIFACT_BUCKET}/glue/${GITHUB_SHA}/${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}/${relative_path}"
+
+            location="$(
+              aws glue get-job \
+                --job-name "$job" \
+                --query "Job.Command.ScriptLocation" \
+                --output text
+            )"
+
+            echo "$job"
+            echo "  Expected: $expected_location"
+            echo "  Actual:   $location"
+
+            test "$location" = "$expected_location"
+          done
+
+          echo "All 8 Glue jobs point to the deployed release."
+
+
