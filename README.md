@@ -113,7 +113,7 @@ The current historical processing scope is approximately **229 GB of Backblaze d
 
 ---
 
-# 2. 🏗️ Overall Architecture
+# 2. 🏗️  Architecture
 
 I divided the project into two major parts:
 
