@@ -134,7 +134,7 @@ The control plane is responsible for deciding what should be processed, controll
 The complete system is:
 <p align="center">
   <img
-    src="architecture/project architecture.svg"
+    src="architecture/project architecuture.svg"
     width="100%"
     alt="Backblaze AWS Lakehouse Architecture"
   />
