@@ -83,7 +83,7 @@ Update the lakehouse
 The project currently uses a historical backfill of about:
 
 ```text
-4,642  of csv files
+4,642 of csv files
 ~229 GB of Data
 ```
 
