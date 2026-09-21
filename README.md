@@ -50,7 +50,7 @@
 
 ---
 
-# 1. 📌 What Is This Project?
+# 1. 📌 About This Project
 
 I built this project around the **Backblaze Drive Stats** dataset.
 
