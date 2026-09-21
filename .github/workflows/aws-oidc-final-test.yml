@@ -33,8 +33,8 @@ jobs:
               f"Bearer {os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']}"
           )
 
-          response = urllib.request.urlopen(request)
-          data = json.load(response)
+          with urllib.request.urlopen(request) as response:
+              data = json.load(response)
 
           print(data["value"])
           PY
@@ -69,11 +69,23 @@ jobs:
       - name: Configure AWS credentials through OIDC
         uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
-          role-to-assume: arn:aws:iam::131912110087:role/backblaze-dev-github-oidc-diagnostic
+          role-to-assume: arn:aws:iam::131912110087:role/backblaze-dev-github-actions-artifact-role
           aws-region: ap-south-1
           audience: sts.amazonaws.com
+          allowed-account-ids: "131912110087"
 
       - name: Verify AWS identity
+        shell: bash
         run: |
           echo "AWS OIDC authentication succeeded."
+          echo "Verifying assumed role identity..."
           aws sts get-caller-identity
+
+      - name: Verify deployment artifact bucket access
+        shell: bash
+        run: |
+          echo "Checking deployment artifact bucket access..."
+          aws s3api head-bucket \
+            --bucket backblaze-dev-deployment-artifacts-131912110087
+
+          echo "S3 deployment artifact bucket access succeeded."
