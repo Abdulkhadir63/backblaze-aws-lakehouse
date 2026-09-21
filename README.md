@@ -3672,7 +3672,7 @@ The project is therefore not dependent on manually rebuilding the environment fr
 
 <!-- :contentReference[oaicite:0]{index=0} -->
 ---
-<center> ## 🌟 About Me </center>
+##<center>  🌟 About Me </center>
 Hi there! I'm **Abdul Khadir**, I'm an Deploma computer Science Pass out Student on a mission to Became a Data Engineer!
 # 📬 Connect With Me
 If you'd like to discuss Data Engineering, share feedback, or simply connect, feel free to reach out.
