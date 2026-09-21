@@ -50,58 +50,100 @@
 
 ---
 
-# 1. 📌 About This Project
+# **BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT**
 
-I built this project around the **Backblaze Drive Stats** dataset.
+<p align="center">
+  <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
+  Historical backfill • Event-driven incremental ingestion • Apache Iceberg • AWS Glue • Lambda • SQS • DynamoDB • Step Functions • Terraform • GitHub Actions
+</p>
 
-Backblaze publishes hard-drive statistics as CSV files. The data is released over time, so there is a large amount of historical data and new files can continue to arrive.
+<p align="center">
+  <a href="DEPLOYMENT.md">📚 Deployment Runbook</a> •
+  <a href="architecture/project%20architecture.svg">🏗️ Architecture</a> •
+  <a href="stepfunctions/backblaze_file_processing.asl.json">⚙️ Step Functions</a>
+</p>
 
-The main goal of this project is not just to read those CSV files with Spark.
-
-I wanted to build the complete data pipeline around them.
-
-That means the project has to handle both sides of the problem:
-
-```text
-HISTORICAL DATA
-      ↓
-Build the lakehouse
-```
-
-and later:
-
-```text
-NEW DATA ARRIVES
-      ↓
-Detect it
-      ↓
-Process it
-      ↓
-Update the lakehouse
-```
-
-The project currently uses a historical backfill of about:
-
-```text
-4,642 of csv files
-~229 GB of Data
-```
-
-After the historical data is loaded, the pipeline is designed to handle new Backblaze CSV files as they arrive.
-
-So the project is built around this simple idea:
-
-```text
-First build the history.
-
-Then keep the history updated.
-```
 ---
-# 3. 🏗️ The Project in Simple Terms
 
-At the highest level, the project has two sides.
+# 1. 📌 What Problem Does This Project Solve?
 
-The first side is the **data processing**:
+I built this project around the Backblaze Drive Stats dataset.
+
+The dataset contains a large amount of historical hard-drive statistics collected over time. The data is useful for analytics, but the real engineering problem is building a pipeline that can process this data reliably and continue processing new files without manual intervention.
+
+This project is built to solve that problem.
+
+The system has to deal with two different situations:
+
+```text
+1. Historical data already exists
+2. New data arrives over time
+```
+
+These two situations are not the same.
+
+Historical data needs a controlled backfill so I can establish the initial state of the lakehouse.
+
+New data needs an incremental, event-driven pipeline so the system can react when a new source file arrives.
+
+The pipeline therefore needs to answer practical engineering questions:
+
+```text
+How do I load a large historical dataset without treating every run
+as a completely new pipeline?
+
+How do I process a new CSV when it arrives without manually
+starting a Glue job?
+
+What happens when the same S3 event is delivered more than once?
+
+How do I know which file is currently being processed?
+
+How do I prevent two files from being processed at the same time
+when the pipeline is designed around one active processing unit?
+
+Where do I preserve the original source data?
+
+Where do I handle changing source schemas?
+
+What happens when records fail validation?
+
+How do I coordinate Bronze → Silver → Data Quality → Gold?
+
+What happens when one processing stage fails?
+
+How do I resume processing after a failure?
+
+How do I deploy infrastructure and application code
+without manually rebuilding everything?
+```
+
+I built the project to handle these problems as one system.
+
+The result is not simply:
+
+```text
+CSV
+  ↓
+Spark
+  ↓
+Table
+```
+
+Instead, the project is split into two connected parts:
+
+```text
+DATA PLANE
+→ Processes the actual data
+
+CONTROL PLANE
+→ Controls what should be processed,
+  when it should be processed,
+  which file should be processed,
+  and what happened to that file
+```
+
+The data plane handles the actual lakehouse processing:
 
 ```text
 S3 RAW
@@ -115,7 +157,7 @@ Data Quality
 Gold
 ```
 
-The second side is the **control and orchestration**:
+The control plane handles the workflow around that processing:
 
 ```text
 S3 Event
@@ -131,54 +173,61 @@ Step Functions
 Glue
 ```
 
-I use the first side to process the data.
+The two planes have different responsibilities.
 
-I use the second side to control when and how that processing happens.
-
----
-
-# 4. 🔄 The Main Idea Behind the Whole Project
-
-The project starts with historical data.
+The data plane answers:
 
 ```text
-Historical Backblaze Data
-        ↓
-Historical Backfill
-        ↓
-Lakehouse Baseline
+"How should the data be processed?"
 ```
 
-After that, new data becomes the problem.
+The control plane answers:
 
 ```text
-New Backblaze CSV
-        ↓
-File Arrives
-        ↓
-Event Is Created
-        ↓
-Pipeline Reacts
-        ↓
-File Is Processed
-        ↓
-Lakehouse Is Updated
+"What work should happen,
+for which file,
+when,
+and what is the current state of that work?"
 ```
 
-So the full lifecycle is:
+This separation is important because the project is not only a Spark transformation pipeline.
+
+It also needs to manage:
 
 ```text
-HISTORICAL BACKFILL
-        ↓
-HISTORICAL BASELINE
-        ↓
-NEW DATA ARRIVES
-        ↓
-EVENT-DRIVEN PROCESSING
-        ↓
-UPDATED LAKEHOUSE
+Source file registration
+       ↓
+Processing state
+       ↓
+File ownership
+       ↓
+Orchestration
+       ↓
+Failure handling
+       ↓
+Resume handling
+       ↓
+Successful completion
 ```
 
-That is the basic idea of the project.
+The project therefore treats data processing and pipeline control as separate concerns that work together.
 
-The rest of this README explains how I built each part and why I made those design decisions.
+The final goal is simple:
+
+```text
+Build the historical lakehouse
+            ↓
+Establish a known baseline
+            ↓
+Detect new files automatically
+            ↓
+Process each new file
+            ↓
+Track its processing state
+            ↓
+Handle failures and resume when possible
+            ↓
+Keep the lakehouse updated
+```
+
+This is the core problem the project is designed to solve.
