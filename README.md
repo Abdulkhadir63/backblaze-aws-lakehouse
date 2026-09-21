@@ -184,7 +184,7 @@ For this project, the historical scope covers the Backblaze data from:
 The backfill scope I worked with is approximately:
 
 ```text
-228 files
+4,642  files
 ~229 GB of source data
 ```
 
