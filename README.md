@@ -720,7 +720,7 @@ Each component has a specific responsibility.
 
 # 6. ☁️ Amazon S3
 
-I use Amazon S3 as the main storage layer.
+I use Amazon S3 as the main storage layer Basically A S3 is our Data Lake. 
 
 S3 stores the original Backblaze source files in the RAW zone.
 
