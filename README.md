@@ -83,8 +83,8 @@ Update the lakehouse
 The project currently uses a historical backfill of about:
 
 ```text
-228 files
-~229 GB
+4,642  of csv files
+~229 GB of Data
 ```
 
 After the historical data is loaded, the pipeline is designed to handle new Backblaze CSV files as they arrive.
