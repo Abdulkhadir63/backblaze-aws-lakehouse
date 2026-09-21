@@ -1269,7 +1269,13 @@ This keeps the dashboard separate from ingestion and transformation.
 QuickSight is therefore not part of the ingestion pipeline itself.
 
 It is the consumption layer that sits after the Gold data has been prepared.
-
+<p align="center">
+  <img
+    src="dashboard/QuickSight.png"
+    width="100%"
+    alt="Backblaze AWS Lakehouse Architecture"
+  />
+</p>
 ---
 
 # 16. 🎯 What the Data Plane Solves
