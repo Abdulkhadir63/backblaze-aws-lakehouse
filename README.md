@@ -3671,6 +3671,15 @@ How to verify the deployment
 The project is therefore not dependent on manually rebuilding the environment from the AWS console.
 
 <!-- :contentReference[oaicite:0]{index=0} -->
+---
+## 🌟 About Me
+Hi there! I'm **Abdul Khadir**, I'm an Deploma computer Science Pass out Student on a mission to Became a Data Engineer!
+# 📬 Connect With Me
+If you'd like to discuss Data Engineering, share feedback, or simply connect, feel free to reach out.
+
+- **LinkedIn:** [https://www.linkedin.com/in/abdul-khadir-44876735a](https://www.google.com/search?q=https://www.linkedin.com/in/abdul-khadir-44876735a)
+- **Instagram:** [https://www.instagram.com/abdulkm\_63](https://www.google.com/search?q=https://www.instagram.com/abdulkm_63)
+
 
 
 
