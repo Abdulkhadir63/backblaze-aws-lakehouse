@@ -910,6 +910,7 @@ Type casting
 Required-field handling
 Deduplication
 Canonical schema handling
+Quarentine bad records instead of deleting
 Schema differences between releases
 ```
 
