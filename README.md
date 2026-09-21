@@ -42,8 +42,6 @@
     </tr>
   </table>
 </p>
----
-
 <p align="center">
   <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
   Historical backfill • Event-driven incremental ingestion • Apache Iceberg • AWS Glue • Lambda • SQS • DynamoDB • Step Functions • Terraform • GitHub Actions
