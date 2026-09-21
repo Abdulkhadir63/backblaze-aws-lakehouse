@@ -83,142 +83,86 @@ The result is not simply:
 ```text
 CSV → Spark → Table
 ```
+# 2. 🔄 How This Project Actually Works
 
-# 2. 🔄 From Historical Backfill to an Event-Driven Pipeline
+I built this project in two stages.
 
-This Project starts with a historical backfill.
+First, I had to load the historical Backblaze data and build the initial lakehouse.
 
-After the historical data has been loaded, the project changes into an event-driven incremental pipeline that processes new Backblaze CSV files as they arrive.
+After that, the problem changed.
 
-The complete idea is:
+Backblaze keeps providing new CSV data, so I needed a way to process a new file automatically whenever it arrives.
+
+That is why this project has two different processing modes:
 
 ```text
-HISTORICAL DATA
-      ↓
-BUILD THE INITIAL LAKEHOUSE
-      ↓
-HISTORICAL BASELINE COMPLETE
-      ↓
-NEW DAILY DATA CONTINUES TO ARRIVE
-      ↓
-EVENT-DRIVEN PIPELINE TAKES OVER
-      ↓
-PROCESS EACH NEW FILE
-      ↓
-KEEP THE LAKEHOUSE UPDATED
+1. Historical Backfill
+2. Event-Driven Incremental Processing
 ```
 
-This is the foundation of the entire project.
+The overall idea is:
+
+```text
+Historical Backblaze Data
+        ↓
+   Historical Backfill
+        ↓
+   Initial Lakehouse
+        ↓
+New Backblaze CSV Arrives
+        ↓
+   Event-Driven Pipeline
+        ↓
+   Process New File
+        ↓
+   Update Lakehouse
+```
+
+I did not want to treat these two problems as exactly the same thing.
+
+Historical data is already there, so I can process it in a controlled way.
+
+New daily data is different because I don't know exactly when the next file will arrive.
+
+The pipeline therefore needs to wait for new data and react when it arrives.
 
 ---
 
-## 2.1 📚 The Project Starts With Historical Data
+## 2.1 📚 First Stage — Historical Backfill
 
-The first problem is not:
+The project first starts with the historical Backblaze data.
+
+The current backfill contains:
 
 ```text
-"How do we process tomorrow's file?"
+228 historical files
 ```
 
-The first problem is:
+and around:
 
 ```text
-"How do we build the lakehouse from the data that already exists?"
+229 GB of historical data
 ```
 
-Backblaze has historical Drive Stats data that already exists before this pipeline starts processing it.
+The first job is to get this data into the lakehouse.
 
-The project therefore begins with a historical backfill.
-
-The current backfill scope is:
+The historical flow is:
 
 ```text
-229 GB historical Data
-```
-
-These files represent the data that must first be loaded into the lakehouse.
-
-The basic idea is:
-
-```text
-229 GB historical Data
+Historical Backblaze Data
         ↓
-     S3 RAW
+      S3 RAW
         ↓
-     Bronze
+bronze_ingestion
         ↓
-     Silver
+silver_cleaned
         ↓
-Data Quality
+data_quality_check
         ↓
-      Gold
+gold_layer
 ```
 
-At this stage, the project is building its initial state.
-
-There is no need to wait for a new event for every historical file.
-
-The files are already available.
-
-The job is to process the historical dataset and establish a usable lakehouse baseline.
-
----
-
-## 2.2 🎯 What Does "Historical Baseline" Mean?
-
-The phrase **historical baseline** simply means:
-
-```text
-"The lakehouse now contains the historical data
-that we decided to load."
-```
-
-Before the backfill:
-
-```text
-Lakehouse
-   ↓
-No historical baseline
-```
-
-After the backfill:
-
-```text
-Lakehouse
-   ↓
-Historical data available
-   ↓
-Bronze
-   ↓
-Silver
-   ↓
-Data Quality
-   ↓
-Gold
-```
-
-This baseline becomes the starting point for everything that happens afterward.
-
-Think of it like taking a starting snapshot of the business data.
-
-The project first gets the lakehouse to a known historical state.
-
-Then it starts maintaining that state.
-
----
-
-## 2.3 🧱 Historical Processing Is a Backfill Problem
-
-A backfill means:
-
-```text
-"Take data that already exists and load it
-into the system."
-```
-
-The historical flow is therefore controlled.
-
-The project has dedicated full-load jobs:
+The full-load jobs are:
 
 ```text
 bronze_ingestion
@@ -227,86 +171,152 @@ data_quality_check
 gold_layer
 ```
 
-The flow is:
+At this stage, I am not waiting for an S3 event for every historical file.
+
+The data already exists.
+
+So the job is simply:
+
+```text
+Take the historical data
+        ↓
+Process it
+        ↓
+Build the lakehouse
+```
+
+---
+
+## 2.2 🎯 What Is the Historical Baseline?
+
+The historical baseline is basically the starting point of the lakehouse.
+
+Before the backfill:
+
+```text
+Lakehouse
+    ↓
+Historical data is not loaded yet
+```
+
+After the backfill:
+
+```text
+Lakehouse
+    ↓
+Historical data is available
+    ↓
+Bronze
+    ↓
+Silver
+    ↓
+Data Quality
+    ↓
+Gold
+```
+
+So when I say:
+
+```text
+"Historical baseline"
+```
+
+I mean:
+
+```text
+"The lakehouse now contains the historical data
+that this project has loaded."
+```
+
+This gives the project a known starting point.
+
+After that, I don't want to rebuild the whole historical dataset every time a new CSV arrives.
+
+I only want to process the new data.
+
+---
+
+## 2.3 🧱 Why Historical Processing Is a Backfill
+
+A backfill is simply taking data that already exists and loading it into the system.
+
+In this project:
 
 ```text
 Historical Data
       ↓
-Full Load Bronze
+Backfill
       ↓
-Full Load Silver
-      ↓
-Data Quality
-      ↓
-Full Load Gold
+Lakehouse
 ```
 
-The important point is that the historical pipeline is trying to establish the dataset's existing history.
+The historical jobs work around the release structure of the Backblaze data.
 
-It is not waiting for a future event.
-
-It is processing known data.
-
----
-
-## 2.4 🗂️ Why the Historical Pipeline Is Release-Oriented
-
-The historical pipeline works around the dataset's release structure.
-
-The processing scope is explicitly controlled using:
+The processing is controlled using:
 
 ```text
 --release_id
 ```
 
-That means the historical processing model is conceptually:
+So the question during historical processing is:
 
 ```text
-Select Release
-      ↓
-Process Release
-      ↓
-Validate Release
-      ↓
-Publish Release
+"Which release am I processing?"
 ```
 
-This is different from the later incremental model.
-
-Historical processing asks:
+For example:
 
 ```text
-"Which historical release am I processing?"
+Release
+    ↓
+Bronze
+    ↓
+Silver
+    ↓
+DQ
+    ↓
+Gold
 ```
 
-Incremental processing asks:
-
-```text
-"Which newly arrived file am I processing?"
-```
-
-That difference is extremely important.
+This is different from the incremental pipeline.
 
 ---
 
-## 2.5 🔀 The Project Changes Operating Mode After the Backfill
+## 2.4 🔀 What Changes After the Historical Backfill?
 
-Once the historical baseline is established, the problem changes.
-
-The system now has to deal with new data.
-
-Backblaze continues to produce new CSV data over time.
-
-The pipeline therefore has to answer:
+Once the historical data has been loaded, the problem is no longer:
 
 ```text
-"A new file arrived.
-How do we process it automatically?"
+"How do I load the old data?"
 ```
 
-This is where event-driven processing begins.
+Now the problem is:
 
-The project changes from:
+```text
+"How do I process the next file when it arrives?"
+```
+
+That is an important change.
+
+The historical phase is:
+
+```text
+Known data
+    ↓
+Controlled backfill
+```
+
+The ongoing phase is:
+
+```text
+New data
+    ↓
+Wait for file
+    ↓
+React to file arrival
+```
+
+So the project changes from:
 
 ```text
 HISTORICAL BACKFILL
@@ -318,51 +328,52 @@ to:
 EVENT-DRIVEN INCREMENTAL PROCESSING
 ```
 
-The transition is:
+The complete transition looks like this:
 
 ```text
-                    START
+                HISTORICAL PHASE
                       │
                       ▼
-             Historical Backfill
+               228 HISTORICAL FILES
                       │
                       ▼
-             228 Historical Files
+                FULL BACKFILL
                       │
                       ▼
-            Historical Baseline
+             HISTORICAL BASELINE
                       │
                       ▼
-          ─────────────────────
-             NEW DATA ERA
-          ─────────────────────
+              ────────────────
+                 AFTER THAT
+              ────────────────
                       │
                       ▼
-           New CSV File Arrives
+             NEW DAILY FILES
                       │
                       ▼
-          Event-Driven Processing
+            EVENT-DRIVEN PIPELINE
 ```
 
-The pipeline is now no longer focused on rebuilding history.
-
-It is focused on keeping the lakehouse current.
+This is one of the main design decisions in the project.
 
 ---
 
-## 2.6 ⚡ What "Event-Driven" Means Here
+## 2.5 ⚡ Why This Is an Event-Driven Pipeline
 
-In this project, **event-driven** means:
+The incremental part of this project is event-driven because the arrival of a new file creates the event that starts the processing flow.
+
+For example:
 
 ```text
-The arrival of a new file creates an event,
-and that event starts the processing workflow.
+2026-03-31.csv
 ```
 
-The system does not need an engineer to manually say:
+arrives in the RAW S3 location.
+
+The pipeline does not need me to manually say:
 
 ```text
-"Start the pipeline because today's file arrived."
+"Start the pipeline now."
 ```
 
 Instead:
@@ -370,65 +381,105 @@ Instead:
 ```text
 New File Arrives
       ↓
-Event Is Created
+S3 Creates Event
       ↓
 Pipeline Reacts
 ```
 
-That is the meaning of event-driven processing in this project.
+That is what I mean when I call this an:
 
-The file arrival is the trigger.
+```text
+EVENT-DRIVEN PIPELINE
+```
+
+The important part is the trigger.
+
+The new file arrival is the trigger.
 
 ---
 
-## 2.7 🔔 The New File Becomes the Trigger
+## 2.6 🔔 What Actually Triggers the Pipeline?
 
-Suppose a new file arrives:
+The trigger starts at S3.
 
-```text
-2026-03-31.csv
-```
-
-The important event is:
+When a matching CSV file is created in the RAW location:
 
 ```text
-"A new source object was created."
-```
-
-The pipeline reacts to that event.
-
-Conceptually:
-
-```text
-2026-03-31.csv
-        ↓
 S3
-        ↓
+ ↓
 ObjectCreated Event
-        ↓
-Pipeline Wakes Up
 ```
 
-The pipeline does not need to constantly ask whether `2026-03-31.csv` exists.
+That event is then sent into the control plane:
 
-The storage system tells the pipeline that the file was created.
+```text
+S3
+ ↓
+SQS
+ ↓
+Lambda
+ ↓
+DynamoDB
+ ↓
+Step Functions
+```
 
-That is the fundamental event-driven idea.
+After that, Step Functions starts the actual data-processing workflow:
+
+```text
+Step Functions
+        ↓
+Bronze
+        ↓
+Silver
+        ↓
+Data Quality
+        ↓
+Gold
+```
+
+So the full event-driven flow is:
+
+```text
+New CSV
+   ↓
+S3
+   ↓
+S3 ObjectCreated Event
+   ↓
+SQS
+   ↓
+Lambda
+   ↓
+DynamoDB
+   ↓
+Step Functions
+   ↓
+Glue / Spark
+   ↓
+Bronze
+   ↓
+Silver
+   ↓
+Data Quality
+   ↓
+Gold
+```
+
+That is the core runtime flow of this project.
 
 ---
 
-## 2.8 🔍 Polling vs Event-Driven Processing
+## 2.7 🔍 Event-Driven vs Polling
 
-It is easier to understand event-driven architecture by comparing it with polling.
+The easiest way to understand this is to compare it with polling.
 
-### Polling
-
-A polling pipeline might repeatedly do this:
+A polling system could keep doing this:
 
 ```text
 Check S3
    ↓
-Is a new file there?
+Is there a new file?
    ↓
 No
    ↓
@@ -436,48 +487,44 @@ Wait
    ↓
 Check S3 again
    ↓
-Is a new file there?
+Is there a new file?
    ↓
 No
    ↓
 Wait
-   ↓
-Check S3 again
 ```
 
-The system keeps checking even when nothing has changed.
+The system keeps asking whether something happened.
 
-### Event-Driven
-
-This project follows a different pattern:
+In my project, the idea is different:
 
 ```text
 Wait
-  ↓
-New File Arrives
-  ↓
-S3 Generates Event
-  ↓
-Pipeline Reacts
+   ↓
+New file arrives
+   ↓
+S3 sends an event
+   ↓
+Pipeline reacts
 ```
 
-The difference is:
+So:
 
 ```text
-POLLING
-→ Ask whether something happened.
+Polling
+→ The pipeline keeps checking for work.
 
-EVENT-DRIVEN
-→ Be notified that something happened.
+Event-driven
+→ The pipeline is notified when work arrives.
 ```
 
-That is why this project is described as an **event-driven pipeline**.
+That is the reason the incremental side of this project is event-driven.
 
 ---
 
-## 2.9 📦 Each New File Becomes a Processing Unit
+## 2.8 📦 One New File Is One Processing Unit
 
-The incremental part of the project is designed around the source file.
+For the incremental pipeline, I treat the source file as the unit of work.
 
 For example:
 
@@ -487,39 +534,48 @@ For example:
 
 becomes one processing unit.
 
-Conceptually:
+The idea is:
 
 ```text
-1 File
-  ↓
-1 Event
-  ↓
-1 Queue Message
-  ↓
+1 Source File
+      ↓
+1 S3 Event
+      ↓
+1 SQS Message
+      ↓
 1 File Control Record
-  ↓
+      ↓
 1 Processing Run
 ```
 
-This gives the system a clear unit of work.
+This makes the processing much easier to track.
 
-The pipeline knows:
-
-```text
-"This specific file is the work I need to process."
-```
-
-That is much more precise than saying:
+Instead of saying:
 
 ```text
-"Process whatever happens to be in S3."
+"Process whatever is in the bucket."
 ```
+
+the system can say:
+
+```text
+"Process this exact file."
+```
+
+That is why the incremental jobs receive:
+
+```text
+--input_path
+--release_id
+```
+
+The `input_path` tells the job exactly which source file it needs to process.
 
 ---
 
-## 2.10 🎯 Why File-Oriented Processing Matters
+## 2.9 🎯 Why I Chose a File-Oriented Incremental Pipeline
 
-Imagine that three new files arrive:
+Suppose three files arrive:
 
 ```text
 2026-03-29.csv
@@ -527,24 +583,24 @@ Imagine that three new files arrive:
 2026-03-31.csv
 ```
 
-The pipeline should be able to distinguish them.
-
-Instead of treating them as one large unknown workload, the control plane can represent them as individual work items:
-
-```text
-FILE A
-2026-03-29.csv
-
-FILE B
-2026-03-30.csv
-
-FILE C
-2026-03-31.csv
-```
-
-That makes operational questions much easier to answer.
+I need to know what happened to each one.
 
 For example:
+
+```text
+2026-03-29.csv
+→ SUCCESS
+
+2026-03-30.csv
+→ FAILED at Data Quality
+
+2026-03-31.csv
+→ PENDING
+```
+
+That is much easier when each file is a clear processing unit.
+
+The pipeline can answer:
 
 ```text
 Which file arrived?
@@ -553,135 +609,53 @@ Which file is being processed?
 
 Which file failed?
 
-Which processing run belongs to that file?
+Which processing run belongs to it?
 
-Which file needs recovery?
+Which stage failed?
 ```
 
-This is one reason the project uses a file-scoped incremental design.
+That is a real operational reason for making the incremental pipeline file-oriented.
 
 ---
 
-## 2.11 🧠 Historical Processing and Incremental Processing Ask Different Questions
+## 2.10 🧠 Historical and Incremental Pipelines Ask Different Questions
 
-The two parts of the project can be understood through two simple questions.
+The two pipelines are doing different jobs.
 
-### Historical Pipeline
-
-```text
-"Which historical release should I process?"
-```
-
-### Incremental Pipeline
+The historical pipeline asks:
 
 ```text
-"Which newly arrived file should I process?"
+"Which release should I process?"
 ```
 
-So the processing models are:
+The incremental pipeline asks:
 
 ```text
-HISTORICAL
-→ RELEASE-ORIENTED
-
-INCREMENTAL
-→ FILE-ORIENTED
+"Which new file should I process?"
 ```
 
-This is a deliberate design decision.
+So:
+
+```text
+Historical
+→ Release-oriented
+
+Incremental
+→ File-oriented
+```
+
+I kept this distinction in the project because it makes the processing scope much clearer.
 
 ---
 
-## 2.12 🔄 What Happens Every Time a New File Arrives?
-
-After the historical baseline has been created, the ongoing runtime looks like this:
-
-```text
-New Backblaze CSV
-        ↓
-S3 receives file
-        ↓
-S3 creates ObjectCreated event
-        ↓
-SQS receives event
-        ↓
-Lambda receives event
-        ↓
-Lambda validates file
-        ↓
-Lambda registers file
-        ↓
-DynamoDB records control state
-        ↓
-Step Functions starts orchestration
-        ↓
-File is claimed
-        ↓
-Bronze runs
-        ↓
-Silver runs
-        ↓
-Data Quality runs
-        ↓
-Gold runs
-        ↓
-Processing succeeds
-        ↓
-Pipeline becomes available
-        ↓
-Ready for the next file
-```
-
-This is the ongoing operating cycle of the system.
-
----
-
-## 2.13 🏗️ Why the Project Needs Two Different Pipelines
-
-It may seem simpler to create only one pipeline and use it for everything.
-
-But the workloads are different.
-
-Historical data is already available:
-
-```text
-Known Data
-   ↓
-Controlled Backfill
-```
-
-New daily data is unpredictable from the pipeline's point of view:
-
-```text
-Wait
-   ↓
-New File Arrives
-   ↓
-React
-```
-
-Trying to force both workloads into exactly the same execution model would make the system harder to reason about.
-
-The project therefore uses:
-
-```text
-FULL LOAD PATH
-→ Historical backfill
-
-INCREMENTAL EVENT-DRIVEN PATH
-→ Newly arriving data
-```
-
----
-
-## 2.14 🧱 Full-Load Path
+## 2.11 🏗️ The Two Processing Paths
 
 The historical path is:
 
 ```text
-Historical Source
+Historical Backblaze Data
         ↓
-S3 RAW
+      S3 RAW
         ↓
 bronze_ingestion
         ↓
@@ -692,247 +666,440 @@ data_quality_check
 gold_layer
 ```
 
-This path exists to establish the historical baseline.
-
-It is not the mechanism used to react to every new daily file.
-
----
-
-## 2.15 ⚡ Incremental Event-Driven Path
-
-The ongoing path is:
+The incremental path is:
 
 ```text
-New Source File
+New Backblaze CSV
         ↓
-S3
+      S3 RAW
         ↓
-ObjectCreated Event
+ ObjectCreated Event
         ↓
-SQS
+        SQS
         ↓
-Lambda
+      Lambda
         ↓
-DynamoDB
+    DynamoDB
         ↓
-Step Functions
+ Step Functions
         ↓
-bronze_layer
+  bronze_layer
         ↓
-silver_layer
+  silver_layer
         ↓
 data_quality_layer
         ↓
 gold_analytics_layer
 ```
 
-This path exists to continuously maintain the lakehouse after the historical baseline has been established.
+The two paths meet at the same lakehouse.
+
+The difference is how the work starts.
+
+```text
+Historical
+→ I start the backfill.
+
+Incremental
+→ The file arrival starts the workflow.
+```
 
 ---
 
-## 2.16 📊 The Two Paths Together
+## 2.12 🔄 What Happens Every Time a New File Arrives?
 
-The complete project can therefore be represented as:
+After the historical baseline is ready, a new file can arrive.
+
+For example:
+
+```text
+2026-03-31.csv
+```
+
+The runtime flow is:
+
+```text
+1. New CSV arrives
+        ↓
+2. S3 stores the file
+        ↓
+3. S3 creates ObjectCreated event
+        ↓
+4. Event goes to SQS
+        ↓
+5. Lambda receives the event
+        ↓
+6. Lambda validates the event
+        ↓
+7. Lambda extracts the file information
+        ↓
+8. Lambda registers the file in DynamoDB
+        ↓
+9. Lambda starts Step Functions
+        ↓
+10. Step Functions claims the file
+        ↓
+11. Bronze processes the file
+        ↓
+12. Silver processes the Bronze data
+        ↓
+13. Data Quality checks the result
+        ↓
+14. Gold creates the analytical output
+        ↓
+15. Step Functions marks the processing successful
+        ↓
+16. Control state is released
+        ↓
+17. Pipeline is ready for the next file
+```
+
+This is what the pipeline does after the historical backfill.
+
+---
+
+## 2.13 🔐 Why I Did Not Connect S3 Directly to Glue
+
+A very simple pipeline could be:
+
+```text
+S3
+ ↓
+Glue
+```
+
+That would work for a basic ETL project.
+
+But this project also needs to deal with:
+
+```text
+Duplicate events
+Processing state
+File ownership
+One active processing unit
+Failure handling
+Recovery
+Orchestration
+```
+
+Glue is not the right place to manage all of those control-plane concerns.
+
+So I separated the system into two parts.
+
+### Control Plane
+
+```text
+S3 Event
+   ↓
+SQS
+   ↓
+Lambda
+   ↓
+DynamoDB
+   ↓
+Step Functions
+```
+
+### Data Plane
+
+```text
+Glue / Spark
+     ↓
+  Bronze
+     ↓
+  Silver
+     ↓
+    DQ
+     ↓
+   Gold
+```
+
+This separation makes the architecture much easier to reason about.
+
+---
+
+## 2.14 🎛️ What the Control Plane Does
+
+The control plane is mainly responsible for managing the work.
+
+It answers questions like:
+
+```text
+Did a new file arrive?
+
+Is this event valid?
+
+Have I already registered this file?
+
+Is another file currently being processed?
+
+Which run owns the current file?
+
+Which stage is running?
+
+Which stage failed?
+
+Can this processing run be resumed?
+```
+
+The control plane is:
+
+```text
+S3
+ ↓
+SQS
+ ↓
+Lambda
+ ↓
+DynamoDB
+ ↓
+Step Functions
+```
+
+The control plane does not perform the heavy data transformation.
+
+It controls the work.
+
+---
+
+## 2.15 🧱 What the Data Plane Does
+
+The data plane handles the actual data.
+
+```text
+S3 RAW
+   ↓
+Bronze
+   ↓
+Silver
+   ↓
+Data Quality
+   ↓
+Gold
+```
+
+This is where Spark does the heavy processing.
+
+The data plane is responsible for:
+
+```text
+Reading the data
+Transforming the data
+Applying schema logic
+Running data quality checks
+Writing lakehouse tables
+```
+
+So the simple way I think about the architecture is:
+
+```text
+CONTROL PLANE
+→ What work should happen?
+
+DATA PLANE
+→ How should the data be processed?
+```
+
+---
+
+## 2.16 🔁 The Whole Project in One Picture
+
+The complete lifecycle is:
 
 ```text
                     BACKBLAZE
                         │
-            ┌───────────┴───────────┐
-            │                       │
-            ▼                       ▼
-     HISTORICAL DATA          NEW DAILY DATA
-            │                       │
-            ▼                       ▼
-      FULL BACKFILL            S3 OBJECT
-            │                       │
-            ▼                       ▼
-          BRONZE                 EVENT
-            │                       │
-            ▼                       ▼
-          SILVER                  SQS
-            │                       │
-            ▼                       ▼
-           DQ                    Lambda
-            │                       │
-            ▼                       ▼
-          GOLD                 DynamoDB
-            │                       │
-            │                       ▼
-            │                 Step Functions
-            │                       │
-            │                       ▼
-            │                     Bronze
-            │                       │
-            │                       ▼
-            │                     Silver
-            │                       │
-            │                       ▼
-            │                      DQ
-            │                       │
-            │                       ▼
-            └───────────────────── Gold
-                                    │
-                                    ▼
-                           UPDATED LAKEHOUSE
+          ┌─────────────┴─────────────┐
+          │                           │
+          ▼                           ▼
+   HISTORICAL DATA              NEW DAILY DATA
+          │                           │
+          ▼                           ▼
+      BACKFILL                  NEW FILE ARRIVES
+          │                           │
+          ▼                           ▼
+        S3 RAW                     S3 RAW
+          │                           │
+          ▼                           ▼
+   Full Load Jobs              ObjectCreated Event
+          │                           │
+          ▼                           ▼
+       Bronze                       SQS
+          │                           │
+          ▼                           ▼
+       Silver                      Lambda
+          │                           │
+          ▼                           ▼
+        DQ                       DynamoDB
+          │                           │
+          ▼                           ▼
+        Gold                   Step Functions
+          │                           │
+          │                           ▼
+          │                         Bronze
+          │                           │
+          │                           ▼
+          │                         Silver
+          │                           │
+          │                           ▼
+          │                          DQ
+          │                           │
+          │                           ▼
+          └──────────────────────── Gold
+                                      │
+                                      ▼
+                              UPDATED LAKEHOUSE
 ```
 
-The historical path builds the starting state.
+The historical side builds the initial state.
 
-The event-driven path maintains that state.
+The event-driven side keeps updating that state.
 
 ---
 
-## 2.17 🔄 The Lakehouse Changes Over Time
+## 2.17 🔄 How the Lakehouse Keeps Growing
 
-The lakehouse is not supposed to be built once and then forgotten.
-
-The expected lifecycle is:
-
-```text
-DAY 1
-Historical Backfill
-        ↓
-Historical Baseline
-```
-
-Then:
-
-```text
-DAY 2
-New File
-        ↓
-Event-Driven Processing
-        ↓
-Lakehouse Updated
-```
-
-Then:
-
-```text
-DAY 3
-New File
-        ↓
-Event-Driven Processing
-        ↓
-Lakehouse Updated Again
-```
-
-Then:
-
-```text
-DAY 4
-New File
-        ↓
-Event-Driven Processing
-        ↓
-Lakehouse Updated Again
-```
-
-And so on.
+The important thing is that the lakehouse is not a one-time load.
 
 The pattern becomes:
 
 ```text
-BASELINE
-   ↓
-NEW FILE
-   ↓
-UPDATE
-   ↓
-NEW FILE
-   ↓
-UPDATE
-   ↓
-NEW FILE
-   ↓
-UPDATE
+Historical Backfill
+       ↓
+Historical Baseline
+       ↓
+New File
+       ↓
+Process File
+       ↓
+Update Lakehouse
+       ↓
+New File
+       ↓
+Process File
+       ↓
+Update Lakehouse
+       ↓
+New File
+       ↓
+Process File
+       ↓
+Update Lakehouse
 ```
 
-This is the long-running operating model of the project.
+That is the ongoing model.
+
+The historical backfill gives me the starting point.
+
+The event-driven pipeline keeps that starting point up to date.
 
 ---
 
-## 2.18 🎯 The Real Purpose of the Event-Driven Design
+## 2.18 🎯 Why This Design Matters
 
-The purpose is not simply:
+The main point of this architecture is not to add AWS services just for the sake of using them.
 
-```text
-"Use more AWS services."
-```
-
-The purpose is to solve a real operational requirement:
-
-```text
-New data arrives over time.
-The pipeline should react automatically.
-```
-
-Therefore:
+Each part has a reason.
 
 ```text
 S3
-→ Detect the new object
+→ Stores the source file and generates the event.
 
 SQS
-→ Safely hold the event
+→ Holds the event until it is processed.
 
 Lambda
-→ Handle and validate the event
+→ Handles the event and prepares the work.
 
 DynamoDB
-→ Track processing state
+→ Keeps the processing state.
 
 Step Functions
-→ Coordinate the workflow
+→ Controls the processing sequence.
 
 Glue
-→ Process the actual data
+→ Runs the actual Spark processing.
+
+Iceberg
+→ Stores the lakehouse tables.
 ```
 
-Each service exists because a different part of the lifecycle needs to be handled.
+The architecture is basically separating:
+
+```text
+"Something new arrived."
+```
+
+from:
+
+```text
+"Now process that data correctly."
+```
+
+S3/SQS/Lambda/DynamoDB/Step Functions handle the first problem.
+
+Glue/Spark/Iceberg handle the second problem.
 
 ---
 
-## 2.19 🧠 The Most Important Concept in This Project
+## 2.19 🧠 The Main Idea Behind the Project
 
-The most important idea to understand before looking at the AWS services is:
+The easiest way to understand the whole project is:
 
 ```text
-This project is not just a historical ETL pipeline.
+First:
 
-It is a pipeline that:
+Load the historical Backblaze data
+and build the lakehouse.
 
-1. Builds a historical baseline
-2. Then switches to continuous incremental processing
-3. Uses file-arrival events to trigger new work
-4. Uses a control plane to manage that work
-5. Uses Glue/Spark to process the actual data
+Then:
+
+Stop thinking of the pipeline as
+a manual batch job.
+
+Instead:
+
+Wait for new Backblaze files.
+
+When a new file arrives:
+
+Detect it
+   ↓
+Queue the event
+   ↓
+Register the file
+   ↓
+Claim the work
+   ↓
+Process the file
+   ↓
+Validate the result
+   ↓
+Update the lakehouse
 ```
 
-The lifecycle is:
+So the project lifecycle is:
 
 ```text
 HISTORICAL BACKFILL
         ↓
 HISTORICAL BASELINE
         ↓
-NEW DAILY DATA
+NEW DAILY FILE
         ↓
 EVENT
         ↓
 CONTROL
         ↓
-PROCESSING
+PROCESS
         ↓
-UPDATED LAKEHOUSE
-```
-
-That is the foundation of the architecture.
-
-The next section can then explain **exactly how the AWS services connect together to make this event-driven flow work**.
+UPDATE LAKEHOUSE
+        ↓
 WAIT FOR NEXT FILE
 ```
 
-This historical-to-event-driven transition is the foundation of the architecture.
+That is the basic idea of the project before going deeper into each AWS service.
+
+---
 
 ---
