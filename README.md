@@ -96,57 +96,7 @@ First build the history.
 
 Then keep the history updated.
 ```
-
 ---
-
-# 2. 🎯 What I Wanted to Build
-
-I did not want this project to stop at:
-
-```text
-CSV
- ↓
-Spark
- ↓
-Table
-```
-
-That would only solve the data transformation part.
-
-I also wanted to solve the problems that appear when the pipeline is actually running.
-
-For example:
-
-```text
-What happens when a new file arrives?
-
-How does the pipeline know that the file arrived?
-
-What happens if the same event is received twice?
-
-How do I know which file is being processed?
-
-How do I stop two processing runs from fighting over the same pipeline?
-
-What happens when Silver fails?
-
-How do I know which stage failed?
-
-How do I process the file again?
-
-Where do I keep the original data?
-
-How do I handle schema changes between Backblaze releases?
-
-How do I validate the data before sending it to Gold?
-
-How do I deploy the whole system without manually creating everything again?
-```
-
-Those questions are what drove the architecture.
-
----
-
 # 3. 🏗️ The Project in Simple Terms
 
 At the highest level, the project has two sides.
