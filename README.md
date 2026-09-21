@@ -2567,6 +2567,1114 @@ What state must be reconciled before processing can safely continue?
 
 That is the purpose of the control plane in this project.
 
+---
+# 23. 🏗️ Terraform — Infrastructure as Code
+
+I use Terraform to create and manage the AWS infrastructure for this project.
+
+The main reason for using Terraform is simple:
+
+I do not want the project to depend on someone manually creating resources in the AWS console and then trying to remember how everything was configured.
+
+Instead, the infrastructure is written as code and stored in the repository.
+
+The idea is:
+
+```text
+Terraform Code
+      ↓
+Terraform Plan
+      ↓
+Review Changes
+      ↓
+Terraform Apply
+      ↓
+AWS Infrastructure
+```
+
+For this project, Terraform manages the infrastructure around the pipeline, including:
+
+```text
+Amazon S3
+Amazon SQS
+SQS DLQ
+AWS Lambda
+Amazon DynamoDB
+AWS Step Functions
+AWS IAM
+Amazon SNS
+AWS Glue Jobs
+```
+
+The important point is that Terraform manages the **infrastructure**, not every piece of application code.
+
+The repository separates infrastructure ownership from application deployment.
+
+---
+
+## 23.1 📁 What Terraform Files Are Doing
+
+The Terraform configuration is split into multiple files instead of putting the whole infrastructure into one large file.
+
+The repository contains Terraform files for areas such as:
+
+```text
+provider.tf
+backend.tf
+
+s3.tf
+sqs.tf
+sqs-policy.tf
+
+dynamodb.tf
+
+lambda.tf
+lambda-event-source.tf
+
+stepfunctions.tf
+
+iam-lambda.tf
+iam-stepfunctions.tf
+iam-glue.tf
+iam-github-oidc.tf
+iam-github-actions.tf
+iam-github-glue.tf
+
+sns.tf
+sns-policy.tf
+
+glue.tf
+artifact-storage.tf
+```
+
+The files are separated by responsibility.
+
+For example:
+
+```text
+s3.tf
+→ S3 infrastructure
+
+sqs.tf
+→ SQS queues
+
+dynamodb.tf
+→ DynamoDB control table
+
+lambda.tf
+→ Lambda infrastructure
+
+stepfunctions.tf
+→ Step Functions state machine
+
+glue.tf
+→ Glue jobs
+
+iam-*.tf
+→ IAM roles and permissions
+
+sns.tf
+→ SNS infrastructure
+```
+
+This makes it easier to understand what Terraform is responsible for without having one huge infrastructure file.
+
+---
+
+## 23.2 🔐 Terraform State
+
+Terraform needs to remember what infrastructure it manages.
+
+It does this through the Terraform state.
+
+For this project, the state is stored remotely in:
+
+```text
+Amazon S3
+```
+
+The project uses the remote state bucket:
+
+```text
+backblaze-de-terraform-state-131912110087
+```
+
+The backend also uses Terraform's native state locking mechanism.
+
+The reason for remote state is that the state should not live only on one developer's laptop.
+
+The team needs one shared source of truth for the Terraform-managed infrastructure.
+
+So instead of:
+
+```text
+Developer Laptop
+      ↓
+local terraform.tfstate
+```
+
+the project uses:
+
+```text
+Terraform
+      ↓
+Remote S3 State
+      ↓
+Shared Infrastructure State
+```
+
+This also means:
+
+```text
+terraform.tfstate
+```
+
+should not be committed to Git.
+
+---
+
+## 23.3 🚫 Do Not Disable Terraform Locking
+
+When using this project, do not run:
+
+```text
+terraform -lock=false
+```
+
+The locking mechanism exists to prevent two Terraform operations from modifying the same state at the same time.
+
+The safe approach is simply:
+
+```text
+terraform plan
+```
+
+or:
+
+```text
+terraform apply
+```
+
+and let Terraform manage the state normally.
+
+---
+
+## 23.4 👤 How a New Developer Starts With Terraform
+
+A new person working with this repository starts by cloning the project.
+
+```powershell
+git clone <repository-url>
+cd backblaze-aws-lakehouse
+```
+
+The next step is to make sure AWS credentials are available for local Terraform usage.
+
+For example, with the AWS CLI:
+
+```powershell
+aws configure
+```
+
+Then verify which AWS account the terminal is using:
+
+```powershell
+aws sts get-caller-identity
+```
+
+This step is important.
+
+Before running Terraform, I want to know:
+
+```text
+Which AWS account am I connected to?
+Which IAM identity am I using?
+```
+
+Do not skip this check.
+
+Running Terraform against the wrong AWS account can create or modify infrastructure in the wrong environment.
+
+---
+
+## 23.5 🚀 Initialize Terraform
+
+After cloning the repository and configuring AWS access:
+
+```powershell
+terraform init
+```
+
+`terraform init` prepares the working directory.
+
+It downloads the required Terraform provider and connects Terraform to the configured backend.
+
+The flow is:
+
+```text
+terraform init
+      ↓
+Load backend
+      ↓
+Load provider
+      ↓
+Prepare working directory
+```
+
+The project uses the AWS provider for the AWS infrastructure.
+
+---
+
+## 23.6 🔎 Validate the Configuration
+
+Before creating anything, validate the Terraform configuration:
+
+```powershell
+terraform validate
+```
+
+This checks whether the Terraform configuration itself is structurally valid.
+
+I also use formatting checks:
+
+```powershell
+terraform fmt -check
+```
+
+The idea is:
+
+```text
+terraform fmt
+        ↓
+terraform validate
+        ↓
+terraform plan
+```
+
+Each step catches a different class of problem.
+
+---
+
+## 23.7 📋 Always Run Terraform Plan First
+
+The next step is:
+
+```powershell
+terraform plan
+```
+
+This is the most important safety step before applying infrastructure changes.
+
+`terraform plan` answers:
+
+```text
+What does Terraform think should change?
+```
+
+The desired result for a fully deployed and synchronized environment is:
+
+```text
+No changes.
+Your infrastructure matches the configuration.
+```
+
+That means:
+
+```text
+Terraform Configuration
+        =
+Actual AWS Infrastructure
+```
+
+I do not recommend blindly running `terraform apply` without looking at the plan first.
+
+---
+
+## 23.8 ▶️ Apply Terraform
+
+When the plan is understood and the changes are intentional:
+
+```powershell
+terraform apply
+```
+
+Terraform then applies the infrastructure changes.
+
+The process is:
+
+```text
+Terraform Configuration
+        ↓
+Terraform Plan
+        ↓
+Review
+        ↓
+Terraform Apply
+        ↓
+AWS Resources
+```
+
+Terraform is therefore responsible for maintaining the infrastructure state.
+
+---
+
+## 23.9 🧠 What Terraform Owns vs What CI/CD Owns
+
+One important design decision in this project is that Terraform does not own everything.
+
+Terraform owns infrastructure such as:
+
+```text
+S3
+SQS
+DynamoDB
+Lambda configuration
+IAM
+Step Functions
+SNS
+Glue job configuration
+```
+
+GitHub Actions owns application deployment artifacts such as:
+
+```text
+Lambda package
+Glue Python scripts
+```
+
+This gives the project a clear ownership boundary:
+
+```text
+Terraform
+→ Infrastructure
+
+GitHub Actions
+→ Application code deployment
+```
+
+This is important because I do not want a normal code deployment to become an infrastructure change.
+
+---
+
+## 23.10 📦 Lambda Code Ownership
+
+The Lambda infrastructure is managed by Terraform.
+
+The actual Lambda package is deployed through GitHub Actions.
+
+Terraform therefore manages things such as:
+
+```text
+Lambda function
+Runtime
+Handler
+Memory
+Timeout
+IAM role
+Event source
+Environment configuration
+```
+
+GitHub Actions manages:
+
+```text
+Lambda Python source
+ZIP package
+Immutable deployment artifact
+Published Lambda version
+```
+
+This means a developer changing:
+
+```text
+lambda_function.py
+```
+
+does not need to rebuild the Terraform infrastructure.
+
+They use the Lambda deployment workflow instead.
+
+---
+
+## 23.11 🧱 Glue Script Ownership
+
+The same separation exists for Glue.
+
+Terraform manages the Glue job infrastructure and configuration.
+
+GitHub Actions manages the actual Glue Python scripts.
+
+So:
+
+```text
+Terraform
+→ Glue Job
+
+GitHub Actions
+→ Glue Script
+```
+
+This prevents application code changes from being mixed together with infrastructure changes.
+
+It also allows the repository to deploy a specific version of a script and verify exactly which artifact a Glue job is using.
+
+---
+
+# 24. 🚀 GitHub Actions — CI/CD
+
+I use GitHub Actions to deploy the application code to AWS.
+
+The main deployment workflows are:
+
+```text
+.github/workflows/deploy-lambda.yml
+.github/workflows/deploy-glue.yml
+```
+
+The basic idea is:
+
+```text
+Developer Changes Code
+        ↓
+Git Commit
+        ↓
+Push to GitHub
+        ↓
+GitHub Actions
+        ↓
+Validate
+        ↓
+Build Artifact
+        ↓
+Upload Artifact
+        ↓
+Deploy to AWS
+        ↓
+Verify Deployment
+```
+
+The workflow is not simply:
+
+```text
+Push Code
+   ↓
+Copy File to AWS
+```
+
+The deployment process also verifies that the artifact actually deployed.
+
+---
+
+## 24.1 🔐 GitHub Connects to AWS Using OIDC
+
+The GitHub Actions workflows use GitHub's OIDC integration with AWS.
+
+That means the repository does not need to store long-lived AWS access keys inside GitHub Actions.
+
+The flow is:
+
+```text
+GitHub Actions
+      ↓
+OIDC Identity
+      ↓
+AWS STS
+      ↓
+Assume IAM Role
+      ↓
+Deploy AWS Resources / Artifacts
+```
+
+The GitHub Actions role is:
+
+```text
+backblaze-dev-github-actions-artifact-role
+```
+
+This role is trusted through GitHub's OIDC identity.
+
+The important security idea is:
+
+```text
+GitHub
+→ Gets temporary AWS credentials
+
+Not:
+
+GitHub
+→ Stores permanent AWS access keys
+```
+
+---
+
+# 25. ⚡ Lambda Deployment Workflow
+
+The Lambda workflow is:
+
+```text
+.github/workflows/deploy-lambda.yml
+```
+
+The workflow can be started manually using GitHub Actions.
+
+The deployment flow is:
+
+```text
+Workflow Start
+      ↓
+Checkout Repository
+      ↓
+Validate Python
+      ↓
+Authenticate to AWS with OIDC
+      ↓
+Verify AWS Identity
+      ↓
+Build Lambda ZIP
+      ↓
+Calculate Expected Code Hash
+      ↓
+Upload Versioned Artifact to S3
+      ↓
+Update Lambda
+      ↓
+Publish Lambda Version
+      ↓
+Verify Published Version
+      ↓
+Verify Code Hash
+      ↓
+Verify Lambda Configuration
+```
+
+The important part is that the deployment is verified after the upload.
+
+---
+
+## 25.1 🧪 Lambda Code Validation
+
+Before deployment, the workflow validates the Python source.
+
+The purpose is simple:
+
+```text
+Catch obvious Python errors
+        ↓
+Before deploying to AWS
+```
+
+This gives the deployment pipeline an early failure point.
+
+It is better to stop during validation than deploy a broken Lambda package.
+
+---
+
+## 25.2 📦 Lambda Artifact
+
+The workflow creates a ZIP package containing the Lambda source.
+
+The package is not treated as a generic mutable file.
+
+The artifact is uploaded using a versioned path based on the Git commit.
+
+The pattern is:
+
+```text
+lambda/
+└── backblaze-dev-s3-event-handler/
+    └── <GITHUB_SHA>.zip
+```
+
+This gives each deployment a specific artifact identity.
+
+The benefit is that I can answer:
+
+```text
+Which source commit created this Lambda package?
+```
+
+instead of only knowing:
+
+```text
+There is a latest.zip file.
+```
+
+---
+
+## 25.3 🧊 Why the Lambda Artifact Is Immutable
+
+The deployment workflow uploads a new artifact for each commit.
+
+It does not keep replacing one generic ZIP package.
+
+The idea is:
+
+```text
+Commit A
+   ↓
+artifact A
+
+Commit B
+   ↓
+artifact B
+
+Commit C
+   ↓
+artifact C
+```
+
+This makes deployments traceable.
+
+It also makes rollback easier because a previous artifact still exists.
+
+---
+
+## 25.4 🔍 Lambda Deployment Verification
+
+After deployment, the workflow verifies the published Lambda version.
+
+It checks that:
+
+```text
+Published Version
+        +
+Expected Code Hash
+```
+
+match the artifact that was just deployed.
+
+The purpose is to verify:
+
+```text
+What I built
+        =
+What AWS is running
+```
+
+This is stronger than only checking whether the `update-function-code` command returned successfully.
+
+---
+
+# 26. 🧱 Glue Deployment Workflow
+
+The Glue workflow is:
+
+```text
+.github/workflows/deploy-glue.yml
+```
+
+This workflow deploys all eight Glue scripts.
+
+The current script groups are:
+
+```text
+FULL LOAD
+
+bronze_ingestion
+silver_cleaned
+data_quality_check
+gold_layer
+```
+
+and:
+
+```text
+INCREMENTAL
+
+bronze_layer
+silver_layer
+data_quality_layer
+gold_analytics_layer
+```
+
+The workflow expects exactly these eight Python scripts.
+
+---
+
+## 26.1 🔎 Glue Deployment Validation
+
+Before deployment, the workflow checks that the expected Glue scripts exist.
+
+The idea is:
+
+```text
+Expected 8 scripts
+        ↓
+Check repository
+        ↓
+If something is missing
+        ↓
+Stop deployment
+```
+
+This prevents accidentally deploying an incomplete set of Glue application code.
+
+---
+
+## 26.2 📦 Glue Artifact Storage
+
+The workflow uploads Glue scripts to the deployment artifact bucket.
+
+The path contains the Git commit and workflow execution information.
+
+The pattern is:
+
+```text
+glue/
+└── <GITHUB_SHA>/
+    └── <GITHUB_RUN_ID>/
+        └── <GITHUB_RUN_ATTEMPT>/
+            └── Glue Script
+```
+
+This means each deployment has its own artifact location.
+
+Again, the goal is traceability.
+
+I can identify:
+
+```text
+Which commit?
+Which workflow run?
+Which deployment attempt?
+Which Glue script?
+```
+
+---
+
+## 26.3 🔧 How Glue Jobs Are Updated
+
+The deployment workflow does not rebuild the entire Glue configuration from scratch.
+
+Instead, it first reads the existing Glue job configuration.
+
+Then it changes the script location while preserving the rest of the job configuration.
+
+Conceptually:
+
+```text
+Existing Glue Job
+        ↓
+Read Current Configuration
+        ↓
+Change ScriptLocation
+        ↓
+Keep Other Configuration
+        ↓
+Update Glue Job
+```
+
+This is important because the Glue job already contains configuration such as:
+
+```text
+Glue version
+Worker type
+Number of workers
+Timeout
+IAM role
+Arguments
+Concurrency
+```
+
+The deployment workflow should not accidentally remove those settings just because a Python script changed.
+
+---
+
+## 26.4 ✅ Glue Deployment Verification
+
+After updating each Glue job, the workflow reads the job configuration again.
+
+It verifies that the job points to the expected deployment artifact.
+
+The idea is:
+
+```text
+Expected Script Location
+        =
+Actual Glue Script Location
+```
+
+The workflow also creates a deployment manifest that records the deployment mapping.
+
+So the deployment process has a clear audit trail:
+
+```text
+Git Commit
+      ↓
+Glue Script
+      ↓
+S3 Artifact
+      ↓
+Glue Job
+```
+
+---
+
+# 27. 🧑‍💻 How a New Developer Uses the Repository
+
+A new developer does not need to manually upload Lambda ZIP files or Python scripts into AWS.
+
+The normal workflow is:
+
+```text
+1. Clone repository
+2. Make code change
+3. Commit change
+4. Push to GitHub
+5. Run the correct GitHub Actions workflow
+6. Check deployment result
+7. Verify AWS
+```
+
+For example, after changing the Lambda code:
+
+```powershell
+git add .
+git commit -m "Update Lambda event handling"
+git push origin main
+```
+
+Then open:
+
+```text
+GitHub
+  ↓
+Actions
+  ↓
+Deploy Lambda
+  ↓
+Run workflow
+```
+
+The workflow then builds and deploys the Lambda package.
+
+---
+
+# 28. 🧑‍💻 Deploying a Glue Script Change
+
+The same idea applies to Glue.
+
+After modifying one of the Glue scripts:
+
+```powershell
+git add .
+git commit -m "Update Silver incremental processing"
+git push origin main
+```
+
+Then in GitHub:
+
+```text
+Actions
+   ↓
+Deploy Glue
+   ↓
+Run workflow
+```
+
+The workflow uploads the new scripts and updates the corresponding Glue jobs.
+
+The developer does not need to manually open each Glue job and change its script location.
+
+---
+
+# 29. 🚫 What a New Developer Should Not Do
+
+Once CI/CD is being used, application code should not be deployed manually through the AWS console.
+
+Do not use:
+
+```text
+AWS Lambda Console
+→ Upload ZIP manually
+```
+
+for normal Lambda deployments.
+
+Do not use:
+
+```text
+AWS Glue Console
+→ Replace script manually
+```
+
+for normal Glue deployments.
+
+The repository should remain the source of truth for application code.
+
+The intended ownership is:
+
+```text
+Terraform
+→ Infrastructure
+
+GitHub
+→ Source Code
+
+GitHub Actions
+→ Application Deployment
+
+AWS
+→ Runs the deployed system
+```
+
+Manual console changes create configuration drift and make it harder to know what version is actually deployed.
+
+---
+
+# 30. 🔄 Normal Development Workflow
+
+The normal workflow for this project is:
+
+```text
+Developer
+    ↓
+Modify Code
+    ↓
+Run Local Checks
+    ↓
+Git Commit
+    ↓
+Git Push
+    ↓
+GitHub Actions
+    ↓
+OIDC Authentication
+    ↓
+Build Artifact
+    ↓
+Upload Immutable Artifact
+    ↓
+Deploy
+    ↓
+Verify
+    ↓
+AWS Runs New Version
+```
+
+For infrastructure changes:
+
+```text
+Terraform Code Change
+        ↓
+terraform fmt
+        ↓
+terraform validate
+        ↓
+terraform plan
+        ↓
+Review
+        ↓
+terraform apply
+```
+
+For application code changes:
+
+```text
+Python Code Change
+        ↓
+Git Push
+        ↓
+GitHub Actions
+        ↓
+Deploy Lambda / Glue
+        ↓
+Verify
+```
+
+This keeps infrastructure deployment and application deployment separate.
+
+---
+
+# 31. 🔁 How Rollback Works
+
+Because Lambda and Glue deployments use commit-specific artifacts, the deployment history is traceable.
+
+For example:
+
+```text
+Commit A
+   ↓
+Artifact A
+
+Commit B
+   ↓
+Artifact B
+
+Commit C
+   ↓
+Artifact C
+```
+
+If a newly deployed version causes a problem, the recovery process can use a known previous Git commit and redeploy that version.
+
+The important idea is:
+
+```text
+Do not guess which code was running.
+
+Use a known commit.
+Build the known artifact.
+Deploy the known version.
+Verify it.
+```
+
+This is one reason immutable artifacts are used instead of constantly overwriting a file called:
+
+```text
+latest.zip
+```
+
+---
+
+# 32. ✅ What Terraform and GitHub Actions Together Give This Project
+
+The two systems solve different parts of deployment.
+
+```text
+Terraform
+→ Creates and manages the AWS infrastructure.
+```
+
+```text
+GitHub Actions
+→ Deploys the Lambda and Glue application code.
+```
+
+Together:
+
+```text
+Git Repository
+        │
+        ├───────────────┐
+        │               │
+        ▼               ▼
+   Terraform       GitHub Actions
+        │               │
+        ▼               ▼
+Infrastructure      Application Code
+        │               │
+        └───────┬───────┘
+                ↓
+               AWS
+```
+
+The result is a deployment model where a new developer can understand:
+
+```text
+Where the infrastructure lives
+Where the application code lives
+How AWS authentication works
+How Lambda is deployed
+How Glue is deployed
+Which system owns what
+How to verify the deployment
+```
+
+The project is therefore not dependent on manually rebuilding the environment from the AWS console.
+
+<!-- :contentReference[oaicite:0]{index=0} -->
+
 
 
 
