@@ -701,7 +701,7 @@ Apache Spark
 Apache Iceberg
 AWS Glue Data Catalog
 Amazon Athena
-Amazon QuickSight
+Amazon QuickSight for Dashboards
 ```
 
 Each component has a specific responsibility.
@@ -714,7 +714,7 @@ Each component has a specific responsibility.
 | Apache Iceberg | Lakehouse table format |
 | AWS Glue Data Catalog | Iceberg table catalog |
 | Amazon Athena | Querying and validation |
-| Amazon QuickSight | Gold-layer analytics |
+| Amazon QuickSight | Gold-layer analytics and For Dashboards |
 
 ---
 
