@@ -179,23 +179,12 @@ The main goals of this project are:
 
 ## Primary Architecture
 
-The primary architecture diagram is stored as SVG.
 
 <p align="center">
   <img
-    src="architecture/project%20architecture.svg"
+    src="architecture/project architecuture.svg"
     width="100%"
     alt="Backblaze AWS Lakehouse Architecture"
-  />
-</p>
-
-### PNG Fallback
-
-<p align="center">
-  <img
-    src="architecture/project%20architecture.png"
-    width="100%"
-    alt="Backblaze AWS Lakehouse Architecture PNG"
   />
 </p>
 
