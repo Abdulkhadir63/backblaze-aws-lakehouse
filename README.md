@@ -50,20 +50,6 @@
 
 ---
 
-# **BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT**
-
-<p align="center">
-  <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
-  Historical backfill • Event-driven incremental ingestion • Apache Iceberg • AWS Glue • Lambda • SQS • DynamoDB • Step Functions • Terraform • GitHub Actions
-</p>
-
-<p align="center">
-  <a href="DEPLOYMENT.md">📚 Deployment Runbook</a> •
-  <a href="architecture/project%20architecture.svg">🏗️ Architecture</a> •
-  <a href="stepfunctions/backblaze_file_processing.asl.json">⚙️ Step Functions</a>
-</p>
-
----
 
 # 1. 📌 What Problem Does This Project Solve?
 
