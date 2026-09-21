@@ -1,4 +1,4 @@
-# **BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT**
+<h1 align="center">BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT</h1>
 
 <p align="center">
   <table>
@@ -46,13 +46,13 @@
 <p align="center">
   <a href="DEPLOYMENT.md">📚 Deployment Runbook</a> •
   <a href="architecture/project architecuture.svg">🏗️ Architecture</a> •
-  <a href="dashboard/QuickSight.png">⚙️ Dashboard</a> • 
-   <a href="docs/cost_analysis.png">💸 My Cost Analysis of this Project</a>
+  <a href="dashboard/QuickSight.png">📊 Dashboard</a> •
+   <a href="docs/cost_analysis.png">💸 Project Cost Analysis</a>
 </p>
 
 ---
 
-# 1. 📌 What I Built
+<h2 align="center">📌 What I Built</h2>
 
 I built an AWS-based data lakehouse for the Backblaze Drive Stats dataset.
 
@@ -113,7 +113,7 @@ The current historical processing scope is approximately **229 GB of Backblaze d
 
 ---
 
-# 2. 🏗️  Architecture
+<h2 align="center">🏗️ Architecture</h2>
 
 I divided the project into two major parts:
 
@@ -156,7 +156,7 @@ The control plane and data plane have different responsibilities, but they work 
 
 ---
 
-# 3. 🔄 Historical Backfill
+<h2 align="center">🔄 Historical Backfill</h2>
 
 The first major part of this project is the historical backfill.
 
@@ -189,7 +189,7 @@ This gives the project a large historical dataset to build the initial lakehouse
 
 ---
 
-## 3.1 📚 Why a Historical Backfill Is Needed
+<h3 align="center">📚 Why a Historical Backfill Is Needed</h3>
 
 The new-file pipeline only makes sense after the existing history is available.
 
@@ -209,7 +209,7 @@ The backfill gives the lakehouse the historical baseline first.
 
 ---
 
-## 3.2 📦 Historical Data Scope
+<h3 align="center">📦 Historical Data Scope</h3>
 
 The Backblaze source is released over multiple years.
 
@@ -242,7 +242,7 @@ This gives each historical processing run a clear boundary.
 
 ---
 
-## 3.3 🎯 How the Backfill Is Controlled
+<h3 align="center">🎯 How the Backfill Is Controlled</h3>
 
 The historical jobs use:
 
@@ -282,7 +282,7 @@ This keeps the historical pipeline controlled and makes a rerun much easier to r
 
 ---
 
-## 3.4 🏗️ Historical Processing Flow
+<h3 align="center">🏗️ Historical Processing Flow</h3>
 
 The historical backfill uses the full-load Glue jobs:
 
@@ -338,7 +338,7 @@ gold_layer
 
 ---
 
-## 3.5 🔐 Why I Process the History in Release-Level Units
+<h3 align="center">🔐 Why I Process the History in Release-Level Units</h3>
 
 Processing the whole historical dataset as one giant uncontrolled job would make failures and reruns harder to manage.
 
@@ -376,7 +376,7 @@ If a release fails, I can identify exactly which release needs attention instead
 
 ---
 
-## 3.6 📊 What This Backfill Achieves
+<h3 align="center">📊 What This Backfill Achieves</h3>
 
 The historical backfill converts the existing Backblaze history into the lakehouse layers used by the project.
 
@@ -416,7 +416,7 @@ Once that baseline exists, the project no longer needs to repeatedly rebuild the
 
 ---
 
-## 3.7 🔄 What Happens After the Backfill
+<h3 align="center">🔄 What Happens After the Backfill</h3>
 
 After the historical baseline is complete, the operating model changes.
 
@@ -459,7 +459,7 @@ Keep Baseline Updated
 That is how the historical load solves the initial 229 GB data problem while still giving the project a clean path into ongoing daily ingestion.
 ---
 
-# 4. ⚡ Incremental Event-Driven Processing
+<h2 align="center">⚡ Incremental Event-Driven Processing</h2>
 
 After the historical baseline is established, the project moves to incremental processing.
 
@@ -503,7 +503,7 @@ This means a matching CSV object created in the RAW location becomes an input to
 
 ---
 
-## 4.1 📦 Incremental Processing Unit
+<h3 align="center">📦 Incremental Processing Unit</h3>
 
 The incremental pipeline is **file-scoped**.
 
@@ -533,7 +533,7 @@ It processes the specific file that triggered the event.
 
 ---
 
-## 4.2 🔧 Incremental Glue Jobs
+<h3 align="center">🔧 Incremental Glue Jobs</h3>
 
 The event-driven workflow uses four incremental Glue jobs:
 
@@ -584,7 +584,7 @@ gold_analytics_layer
 
 ---
 
-## 4.3 🎯 Explicit Input Scope
+<h3 align="center">🎯 Explicit Input Scope</h3>
 
 The incremental jobs are also designed with explicit processing scope.
 
@@ -625,7 +625,7 @@ Not:
 
 ---
 
-## 4.4 🔄 Historical vs Incremental
+<h3 align="center">🔄 Historical vs Incremental</h3>
 
 The two operating modes now have clear responsibilities.
 
@@ -671,7 +671,7 @@ Gold
 
 This is the event-driven part of the project that takes over after the historical backfill.
 
-# 5. 🗂️ Data Plane
+<h2 align="center">🗂️ Data Plane</h2>
 
 The data plane is the part of the project that actually processes the Backblaze data.
 
@@ -723,7 +723,7 @@ They work together as one data-processing path.
 
 ---
 
-# 6. ☁️ Amazon S3
+<h2 align="center">☁️ Amazon S3</h2>
 
 I use Amazon S3 as the main storage layer.
 
@@ -795,7 +795,7 @@ So S3 has two important responsibilities here:
 
 ---
 
-# 7. 🧱 Bronze Layer
+<h2 align="center">🧱 Bronze Layer</h2>
 
 Bronze is the first processing layer after RAW.
 
@@ -864,7 +864,7 @@ Bronze Iceberg Table
 
 ---
 
-# 8. 🧹 Silver Layer
+<h2 align="center">🧹 Silver Layer</h2>
 
 Silver is where the source-oriented Bronze data is turned into a controlled structure for downstream use.
 
@@ -907,12 +907,10 @@ Type casting
 Required-field handling
 Deduplication
 Canonical schema handling
-Silver Layer also includes quarantine handling.
-This means invalid records do not have to simply disappear.
-They can be isolated with the information needed to understand why they were rejected.
-
 Schema differences between releases
 ```
+
+Silver also includes quarantine handling. This means invalid records do not have to simply disappear. They can be isolated with the information needed to understand why they were rejected.
 
 The important reason for doing this in Silver is that the Backblaze source structure is not guaranteed to remain exactly the same across all releases.
 
@@ -940,7 +938,7 @@ that the rest of the pipeline can use?
 
 ---
 
-# 9. ✅ Data Quality Layer
+<h2 align="center">✅ Data Quality Layer</h2>
 
 The project has a separate Data Quality stage.
 
@@ -990,7 +988,7 @@ This gives the pipeline an explicit quality checkpoint before Gold.
 
 ---
 
-# 10. 🏆 Gold Layer
+<h2 align="center">🏆 Gold Layer</h2>
 
 Gold is the final analytical layer of the lakehouse.
 
@@ -1038,7 +1036,7 @@ The Gold layer is then consumed by the analytical side of the project.
 
 ---
 
-# 11. 🧊 Apache Iceberg
+<h2 align="center">🧊 Apache Iceberg</h2>
 
 I use Apache Iceberg as the table format for the lakehouse.
 
@@ -1097,7 +1095,7 @@ into tables that data tools can reliably work with?
 
 ---
 
-# 12. ⚙️ Apache Spark and AWS Glue
+<h2 align="center">⚙️ Apache Spark and AWS Glue</h2>
 
 I use Apache Spark for the actual distributed data processing.
 
@@ -1158,7 +1156,7 @@ Iceberg is the table layer.
 
 ---
 
-# 13. 🔗 How the Data Plane Connects Together
+<h2 align="center">🔗 How the Data Plane Connects Together</h2>
 
 The data plane is not a collection of unrelated jobs.
 
@@ -1199,7 +1197,7 @@ The result is a controlled progression from source data to analytical data.
 
 ---
 
-# 14. 🔍 Amazon Athena
+<h2 align="center">🔍 Amazon Athena</h2>
 
 I use Amazon Athena to query the lakehouse tables.
 
@@ -1235,7 +1233,7 @@ Athena therefore acts as both a query layer and a validation tool in the project
 
 ---
 
-# 15. 📊 Amazon QuickSight
+<h2 align="center">📊 Amazon QuickSight</h2>
 
 I use Amazon QuickSight as the reporting and dashboard layer.
 
@@ -1275,7 +1273,7 @@ It is the consumption layer that sits after the Gold data has been prepared.
 </p>
 ---
 
-# 16. 🎯 What the Data Plane Solves
+<h2 align="center">🎯 What the Data Plane Solves</h2>
 
 The data plane solves the actual data problem.
 
@@ -1315,7 +1313,7 @@ Bronze
 → Durable ingestion
 
 Silver
-→ Standardization transformation and Quarentine bad records
+→ Standardization, transformation, and quarantine of invalid records
 
 Data Quality
 → Validation
@@ -1327,7 +1325,7 @@ Gold
 This is the main purpose of the data plane.
 
 The control plane will handle the question of **when and how this processing should run**.
-# 13. 🎛️ Control Plane
+<h2 align="center">🎛️ Control Plane</h2>
 
 The control plane is the part of the system that manages the lifecycle of a processing request.
 
@@ -1395,11 +1393,10 @@ Lightweight event handling and state management stay in the control plane.
 
 This prevents the event handler from becoming a large processing application and keeps orchestration logic separate from transformation logic.
 
-<!-- :contentReference[oaicite:0]{index=0} -->
 
 ---
 
-# 14. 📨 Amazon SQS
+<h2 align="center">📨 Amazon SQS</h2>
 
 I use Amazon SQS between the S3 event source and Lambda.
 
@@ -1425,7 +1422,7 @@ SQS
 Lambda
 ```
 
-## Why I Used SQS
+<h3 align="center">Why I Used SQS</h3>
 
 S3 can generate events when source files are created, but I did not connect the event directly to the rest of the processing workflow.
 
@@ -1433,7 +1430,7 @@ I inserted SQS as a durable event boundary.
 
 This solves several control-plane problems.
 
-### Event Buffering
+<h4 align="center">Event Buffering</h4>
 
 S3 produces the event and SQS holds it until Lambda processes it.
 
@@ -1449,7 +1446,7 @@ SQS stores event
 Lambda consumes event
 ```
 
-### Decoupling
+<h4 align="center">Decoupling</h4>
 
 SQS separates the event producer from the event consumer.
 
@@ -1459,13 +1456,13 @@ Lambda does not need to be directly responsible for the S3 event producer.
 
 The two components communicate through the queue.
 
-### Retry Boundary
+<h4 align="center">Retry Boundary</h4>
 
 If Lambda cannot successfully process a message, the message can become available again according to the SQS retry and visibility behavior.
 
 The event therefore has a controlled retry boundary before it reaches the dead-letter queue.
 
-### Dead-letter Handling
+<h4 align="center">Dead-letter Handling</h4>
 
 Messages that continue to fail can move to:
 
@@ -1477,7 +1474,7 @@ This prevents an invalid or repeatedly failing event from remaining in the main 
 
 The DLQ also gives the control plane a separate place to investigate failed event delivery.
 
-## What SQS Does Not Do
+<h3 align="center">What SQS Does Not Do</h3>
 
 SQS does not:
 
@@ -1507,11 +1504,10 @@ Lambda
 
 The SQS-to-Lambda event source mapping is configured with a batch size of `1`, so the deployed event handler receives one queue message at a time.
 
-<!-- :contentReference[oaicite:1]{index=1} -->
 
 ---
 
-# 15. 🔧 AWS Lambda
+<h2 align="center">🔧 AWS Lambda</h2>
 
 I use AWS Lambda as the lightweight control handler.
 
@@ -1541,7 +1537,7 @@ Register File
 Start Step Functions
 ```
 
-## Why I Used Lambda
+<h3 align="center">Why I Used Lambda</h3>
 
 The event arriving from S3 is small control information.
 
@@ -1565,7 +1561,7 @@ It also prevents the Lambda function from becoming responsible for the entire da
 
 ---
 
-## What Lambda Does
+<h3 align="center">What Lambda Does</h3>
 
 Lambda receives the SQS message and extracts the S3 event contained inside it.
 
@@ -1602,7 +1598,7 @@ Validated Processing Information
 
 ---
 
-## Event Validation
+<h3 align="center">Event Validation</h3>
 
 The incoming event is treated as external input.
 
@@ -1634,7 +1630,7 @@ An invalid event should stop at this boundary instead of creating a processing u
 
 ---
 
-## File Registration
+<h3 align="center">File Registration</h3>
 
 After validation, Lambda registers the source file in DynamoDB.
 
@@ -1663,7 +1659,7 @@ That would make recovery and debugging much harder.
 
 ---
 
-## Duplicate-safe Registration
+<h3 align="center">Duplicate-safe Registration</h3>
 
 The registration is designed to be idempotent.
 
@@ -1705,7 +1701,7 @@ The current Lambda implementation also attempts to start the Step Functions work
 
 ---
 
-## Lambda Does Not Run Glue Directly
+<h3 align="center">Lambda Does Not Run Glue Directly</h3>
 
 Lambda does not start the Bronze, Silver, Data Quality, and Gold jobs individually.
 
@@ -1727,11 +1723,10 @@ It prevents orchestration decisions from being scattered across Lambda code.
 
 The Lambda is therefore the event handler and registration component, not the main orchestrator.
 
-<!-- :contentReference[oaicite:2]{index=2} -->
 
 ---
 
-# 16. 🗄️ Amazon DynamoDB
+<h2 align="center">🗄️ Amazon DynamoDB</h2>
 
 I use DynamoDB as the state store for the control plane.
 
@@ -1767,7 +1762,7 @@ This distinction is important because the pipeline needs to know what is happeni
 
 ---
 
-## What DynamoDB Solves
+<h3 align="center">What DynamoDB Solves</h3>
 
 The pipeline needs persistent answers to questions such as:
 
@@ -1793,7 +1788,7 @@ DynamoDB provides that persistent control-plane state.
 
 ---
 
-## File-level State
+<h3 align="center">File-level State</h3>
 
 Each source file receives a persistent record.
 
@@ -1821,7 +1816,7 @@ That persistent state is what makes the processing unit traceable.
 
 ---
 
-# 17. 🔐 DynamoDB Provides Idempotency
+<h2 align="center">🔐 DynamoDB Provides Idempotency</h2>
 
 The control plane uses DynamoDB conditional registration to protect against duplicate processing.
 
@@ -1865,11 +1860,10 @@ That is important because duplicate detection after Spark processing would alrea
 
 The control plane therefore protects the pipeline at the work-registration stage.
 
-<!-- :contentReference[oaicite:3]{index=3} -->
 
 ---
 
-# 18. 🔒 Pipeline Processing Ownership
+<h2 align="center">🔒 Pipeline Processing Ownership</h2>
 
 File-level state alone is not enough.
 
@@ -1916,7 +1910,7 @@ Which processing run owns that file?
 
 ---
 
-# 19. 🎯 Why Processing Ownership Exists
+<h2 align="center">🎯 Why Processing Ownership Exists</h2>
 
 The incremental pipeline is intentionally designed around one active processing unit at a time.
 
@@ -1944,7 +1938,7 @@ This gives the system a controlled processing queue rather than an uncontrolled 
 
 ---
 
-# 20. 🔀 AWS Step Functions
+<h2 align="center">🔀 AWS Step Functions</h2>
 
 I use AWS Step Functions as the main orchestration engine.
 
@@ -1972,7 +1966,7 @@ Step Functions is responsible for deciding how the registered processing work mo
 
 ---
 
-## Why I Used Step Functions
+<h3 align="center">Why I Used Step Functions</h3>
 
 I did not put the complete orchestration logic inside Lambda.
 
@@ -2010,7 +2004,7 @@ This makes the processing lifecycle visible and traceable.
 
 ---
 
-# 21. 🧠 Step Functions Determines the Processing Work
+<h2 align="center">🧠 Step Functions Determines the Processing Work</h2>
 
 When the workflow starts, Step Functions does not blindly launch Glue.
 
@@ -2046,7 +2040,7 @@ pipeline.
 
 ---
 
-# 22. 🔒 Step Functions Claims the Processing Unit
+<h2 align="center">🔒 Step Functions Claims the Processing Unit</h2>
 
 Before heavy processing starts, the source file must be claimed.
 
@@ -2088,7 +2082,7 @@ Without an explicit claim, it would be difficult to determine which workflow own
 
 ---
 
-# 23. 🥉 Step Functions Controls the Bronze Stage
+<h2 align="center">🥉 Step Functions Controls the Bronze Stage</h2>
 
 After the file is claimed, Step Functions starts the incremental Bronze job:
 
@@ -2125,7 +2119,7 @@ It passes the processing scope associated with the claimed file.
 
 ---
 
-# 24. ➡️ Step Functions Controls the Processing Sequence
+<h2 align="center">➡️ Step Functions Controls the Processing Sequence</h2>
 
 After Bronze completes successfully, Step Functions moves to the next stage.
 
@@ -2151,7 +2145,7 @@ The orchestration layer owns that dependency chain.
 
 ---
 
-# 25. 🧹 Step Functions Controls Silver
+<h2 align="center">🧹 Step Functions Controls Silver</h2>
 
 After Bronze succeeds, Step Functions starts:
 
@@ -2182,7 +2176,7 @@ The control plane therefore does not contain the transformation logic.
 
 ---
 
-# 26. 🚦 Step Functions Controls Data Quality
+<h2 align="center">🚦 Step Functions Controls Data Quality</h2>
 
 After Silver completes, Step Functions starts:
 
@@ -2220,7 +2214,7 @@ This prevents the orchestration layer from treating successful Spark execution a
 
 ---
 
-# 27. 🥇 Step Functions Controls Gold
+<h2 align="center">🥇 Step Functions Controls Gold</h2>
 
 When Data Quality succeeds, Step Functions starts:
 
@@ -2250,7 +2244,7 @@ Gold is the final processing stage in the incremental workflow.
 
 ---
 
-# 28. ✅ Successful Completion
+<h2 align="center">✅ Successful Completion</h2>
 
 When Gold completes successfully, Step Functions enters the success path.
 
@@ -2284,7 +2278,7 @@ This allows another registered processing unit to be handled.
 
 ---
 
-# 29. ❌ Failure Handling
+<h2 align="center">❌ Failure Handling</h2>
 
 Failures are handled by the orchestration layer rather than being left as isolated Glue errors.
 
@@ -2309,7 +2303,7 @@ because the control plane needs enough information to determine the next recover
 
 ---
 
-# 30. 🔄 Resume Processing
+<h2 align="center">🔄 Resume Processing</h2>
 
 The Step Functions workflow contains resume logic for failed processing states.
 
@@ -2353,7 +2347,7 @@ This makes recovery state-aware.
 
 ---
 
-# 31. ⚠️ Runtime Reliability Finding
+<h2 align="center">⚠️ Runtime Reliability Finding</h2>
 
 During runtime testing, the project exposed an important control-plane failure scenario.
 
@@ -2406,11 +2400,10 @@ cannot always be assumed to remain synchronized after every type of termination.
 
 The control plane therefore needs to treat stale processing ownership as a recovery case that must be validated against the actual Step Functions execution and source-file relationship before changing state.
 
-<!-- :contentReference[oaicite:4]{index=4} -->
 
 ---
 
-# 32. 🔔 Amazon SNS
+<h2 align="center">🔔 Amazon SNS</h2>
 
 I also created the SNS notification infrastructure for the control plane.
 
@@ -2442,11 +2435,10 @@ SNS
 
 This distinction is intentional so the README represents what was actually built rather than claiming functionality that is not currently active.
 
-<!-- :contentReference[oaicite:5]{index=5} -->
 
 ---
 
-# 33. 🔗 Complete Control Plane Flow
+<h2 align="center">🔗 Complete Control Plane Flow</h2>
 
 The complete control-plane lifecycle is:
 
@@ -2496,7 +2488,7 @@ The control plane manages the lifecycle of the work.
 
 ---
 
-# 34. 🎯 What the Control Plane Solves
+<h2 align="center">🎯 What the Control Plane Solves</h2>
 
 Without the control plane, the architecture would be much closer to:
 
@@ -2565,7 +2557,7 @@ What state must be reconciled before processing can safely continue?
 That is the purpose of the control plane in this project.
 
 ---
-# 23. 🏗️ Terraform — Infrastructure as Code
+<h2 align="center">🏗️ Terraform — Infrastructure as Code</h2>
 
 I use Terraform to create and manage the AWS infrastructure for this project.
 
@@ -2609,7 +2601,7 @@ The repository separates infrastructure ownership from application deployment.
 
 ---
 
-## 23.1 📁 What Terraform Files Are Doing
+<h3 align="center">📁 What Terraform Files Are Doing</h3>
 
 The Terraform configuration is split into multiple files instead of putting the whole infrastructure into one large file.
 
@@ -2678,7 +2670,7 @@ This makes it easier to understand what Terraform is responsible for without hav
 
 ---
 
-## 23.2 🔐 Terraform State
+<h3 align="center">🔐 Terraform State</h3>
 
 Terraform needs to remember what infrastructure it manages.
 
@@ -2730,7 +2722,7 @@ should not be committed to Git.
 
 ---
 
-## 23.3 🚫 Do Not Disable Terraform Locking
+<h3 align="center">🚫 Do Not Disable Terraform Locking</h3>
 
 When using this project, do not run:
 
@@ -2756,7 +2748,7 @@ and let Terraform manage the state normally.
 
 ---
 
-## 23.4 👤 How a New Developer Starts With Terraform
+<h3 align="center">👤 How a New Developer Starts With Terraform</h3>
 
 A new person working with this repository starts by cloning the project.
 
@@ -2794,7 +2786,7 @@ Running Terraform against the wrong AWS account can create or modify infrastruct
 
 ---
 
-## 23.5  Initialize Terraform
+<h3 align="center">Initialize Terraform</h3>
 
 After cloning the repository and configuring AWS access:
 
@@ -2822,7 +2814,7 @@ The project uses the AWS provider for the AWS infrastructure.
 
 ---
 
-## 23.6 🔎 Validate the Configuration
+<h3 align="center">🔎 Validate the Configuration</h3>
 
 Before creating anything, validate the Terraform configuration:
 
@@ -2852,7 +2844,7 @@ Each step catches a different class of problem.
 
 ---
 
-## 23.7 📋 Always Run Terraform Plan First
+<h3 align="center">📋 Always Run Terraform Plan First</h3>
 
 The next step is:
 
@@ -2887,7 +2879,7 @@ I do not recommend blindly running `terraform apply` without looking at the plan
 
 ---
 
-## 23.8 ▶️ Apply Terraform
+<h3 align="center">▶️ Apply Terraform</h3>
 
 When the plan is understood and the changes are intentional:
 
@@ -2915,7 +2907,7 @@ Terraform is therefore responsible for maintaining the infrastructure state.
 
 ---
 
-## 23.9 🧠 What Terraform Owns vs What CI/CD Owns
+<h3 align="center">🧠 What Terraform Owns vs What CI/CD Owns</h3>
 
 One important design decision in this project is that Terraform does not own everything.
 
@@ -2953,7 +2945,7 @@ This is important because I do not want a normal code deployment to become an in
 
 ---
 
-## 23.10 📦 Lambda Code Ownership
+<h3 align="center">📦 Lambda Code Ownership</h3>
 
 The Lambda infrastructure is managed by Terraform.
 
@@ -2993,7 +2985,7 @@ They use the Lambda deployment workflow instead.
 
 ---
 
-## 23.11 🧱 Glue Script Ownership
+<h3 align="center">🧱 Glue Script Ownership</h3>
 
 The same separation exists for Glue.
 
@@ -3017,7 +3009,7 @@ It also allows the repository to deploy a specific version of a script and verif
 
 ---
 
-# 24.  GitHub Actions — CI/CD
+<h2 align="center">🚀 GitHub Actions — CI/CD</h2>
 
 I use GitHub Actions to deploy the application code to AWS.
 
@@ -3062,7 +3054,7 @@ The deployment process also verifies that the artifact actually deployed.
 
 ---
 
-## 24.1 🔐 GitHub Connects to AWS Using OIDC
+<h3 align="center">🔐 GitHub Connects to AWS Using OIDC</h3>
 
 The GitHub Actions workflows use GitHub's OIDC integration with AWS.
 
@@ -3104,7 +3096,7 @@ GitHub
 
 ---
 
-# 25. ⚡ Lambda Deployment Workflow
+<h2 align="center">⚡ Lambda Deployment Workflow</h2>
 
 The Lambda workflow is:
 
@@ -3148,7 +3140,7 @@ The important part is that the deployment is verified after the upload.
 
 ---
 
-## 25.1 🧪 Lambda Code Validation
+<h3 align="center">🧪 Lambda Code Validation</h3>
 
 Before deployment, the workflow validates the Python source.
 
@@ -3166,7 +3158,7 @@ It is better to stop during validation than deploy a broken Lambda package.
 
 ---
 
-## 25.2 📦 Lambda Artifact
+<h3 align="center">📦 Lambda Artifact</h3>
 
 The workflow creates a ZIP package containing the Lambda source.
 
@@ -3198,7 +3190,7 @@ There is a latest.zip file.
 
 ---
 
-## 25.3 🧊 Why the Lambda Artifact Is Immutable
+<h3 align="center">🧊 Why the Lambda Artifact Is Immutable</h3>
 
 The deployment workflow uploads a new artifact for each commit.
 
@@ -3226,7 +3218,7 @@ It also makes rollback easier because a previous artifact still exists.
 
 ---
 
-## 25.4 🔍 Lambda Deployment Verification
+<h3 align="center">🔍 Lambda Deployment Verification</h3>
 
 After deployment, the workflow verifies the published Lambda version.
 
@@ -3252,7 +3244,7 @@ This is stronger than only checking whether the `update-function-code` command r
 
 ---
 
-# 26. 🧱 Glue Deployment Workflow
+<h2 align="center">🧱 Glue Deployment Workflow</h2>
 
 The Glue workflow is:
 
@@ -3288,7 +3280,7 @@ The workflow expects exactly these eight Python scripts.
 
 ---
 
-## 26.1 🔎 Glue Deployment Validation
+<h3 align="center">🔎 Glue Deployment Validation</h3>
 
 Before deployment, the workflow checks that the expected Glue scripts exist.
 
@@ -3308,7 +3300,7 @@ This prevents accidentally deploying an incomplete set of Glue application code.
 
 ---
 
-## 26.2 📦 Glue Artifact Storage
+<h3 align="center">📦 Glue Artifact Storage</h3>
 
 The workflow uploads Glue scripts to the deployment artifact bucket.
 
@@ -3339,7 +3331,7 @@ Which Glue script?
 
 ---
 
-## 26.3 🔧 How Glue Jobs Are Updated
+<h3 align="center">🔧 How Glue Jobs Are Updated</h3>
 
 The deployment workflow does not rebuild the entire Glue configuration from scratch.
 
@@ -3377,7 +3369,7 @@ The deployment workflow should not accidentally remove those settings just becau
 
 ---
 
-## 26.4 ✅ Glue Deployment Verification
+<h3 align="center">✅ Glue Deployment Verification</h3>
 
 After updating each Glue job, the workflow reads the job configuration again.
 
@@ -3407,7 +3399,7 @@ Glue Job
 
 ---
 
-# 27. 🧑‍💻 How a New Developer Uses the Repository
+<h2 align="center">🧑‍💻 How a New Developer Uses the Repository</h2>
 
 A new developer does not need to manually upload Lambda ZIP files or Python scripts into AWS.
 
@@ -3447,7 +3439,7 @@ The workflow then builds and deploys the Lambda package.
 
 ---
 
-# 28. 🧑‍💻 Deploying a Glue Script Change
+<h2 align="center">🧑‍💻 Deploying a Glue Script Change</h2>
 
 The same idea applies to Glue.
 
@@ -3475,7 +3467,7 @@ The developer does not need to manually open each Glue job and change its script
 
 ---
 
-# 29. 🚫 What a New Developer Should Not Do
+<h2 align="center">🚫 What a New Developer Should Not Do</h2>
 
 Once CI/CD is being used, application code should not be deployed manually through the AWS console.
 
@@ -3519,7 +3511,7 @@ Manual console changes create configuration drift and make it harder to know wha
 
 ---
 
-# 30. 🔄 Normal Development Workflow
+<h2 align="center">🔄 Normal Development Workflow</h2>
 
 The normal workflow for this project is:
 
@@ -3583,7 +3575,7 @@ This keeps infrastructure deployment and application deployment separate.
 
 ---
 
-# 31. 🔁 How Rollback Works
+<h2 align="center">🔁 How Rollback Works</h2>
 
 Because Lambda and Glue deployments use commit-specific artifacts, the deployment history is traceable.
 
@@ -3624,7 +3616,7 @@ latest.zip
 
 ---
 
-# 32. ✅ What Terraform and GitHub Actions Together Give This Project
+<h2 align="center">✅ What Terraform and GitHub Actions Together Give This Project</h2>
 
 The two systems solve different parts of deployment.
 
@@ -3670,16 +3662,15 @@ How to verify the deployment
 
 The project is therefore not dependent on manually rebuilding the environment from the AWS console.
 
-<!-- :contentReference[oaicite:0]{index=0} -->
 ---
 <div align="center">
 
-## 🌟 About Me
+<h3 align="center">🌟 About Me</h3>
 Hi there! I'm **Abdul Khadir**, a Diploma in Computer Science Engineering graduate on a mission to become a Data Engineer!
 
 ---
 
-## 📬 Connect With Me
+<h3 align="center">📬 Connect With Me</h3>
 If you'd like to discuss Data Engineering, share feedback, or simply connect, feel free to reach out.
 
 <p align="center">
