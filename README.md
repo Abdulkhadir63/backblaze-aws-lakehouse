@@ -86,8 +86,6 @@ CSV → Spark → Table
 
 # 2. 🧭 How This Project Works From Start to Finish
 
-Before looking at individual AWS services, it is important to understand the complete lifecycle of this project.
-
 This project has **two major phases**:
 
 ```text
