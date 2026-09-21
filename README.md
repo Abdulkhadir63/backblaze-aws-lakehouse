@@ -12,7 +12,7 @@
         <sub><b>Apache Spark</b></sub>
       </td>
       <td align="center" width="95">
-       <img src="https://shields.io" alt="Apache Iceberg" height="32"/>
+       ![Apache Iceberg](https://shields.io)
         <sub><b>Apache Iceberg</b></sub>
       </td>
       <td align="center" width="95">
