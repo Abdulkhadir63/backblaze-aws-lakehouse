@@ -175,29 +175,6 @@ The main goals of this project are:
 
 ---
 
-# 📊 Project Status
-
-| Area | Status |
-|---|---|
-| AWS infrastructure deployment | ✅ Verified |
-| Terraform reconciliation | ✅ Verified |
-| Lambda CI/CD | ✅ Verified |
-| Glue CI/CD | ✅ Verified |
-| GitHub OIDC | ✅ Verified |
-| S3 → SQS wiring | ✅ Verified |
-| SQS → Lambda mapping | ✅ Verified |
-| DynamoDB control plane | ✅ Verified |
-| Step Functions deployment | ✅ Verified |
-| Deployment documentation | ✅ Complete |
-| Security / credential audit | ✅ Completed |
-| Runtime E2E validation | 🔄 Final controlled test |
-| Runtime stale-state recovery | 🚧 Hardening item |
-| Full Terraform portability for arbitrary AWS accounts | 🚧 Hardening item |
-
-> **Important:** infrastructure deployment success is not the same as proving a clean end-to-end runtime execution.
-
----
-
 # 🏗️ Project Architecture
 
 ## Primary Architecture
