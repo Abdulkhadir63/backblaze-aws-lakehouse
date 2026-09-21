@@ -910,7 +910,9 @@ Type casting
 Required-field handling
 Deduplication
 Canonical schema handling
-Quarentine bad records instead of deleting
+Silver Layer also includes quarantine handling.
+This means invalid records do not have to simply disappear.
+They can be isolated with the information needed to understand why they were rejected.
 Schema differences between releases
 ```
 
@@ -975,12 +977,6 @@ Gold
 ```
 
 The DQ stage checks the processed dataset against the required quality rules.
-
-The project also includes quarantine handling.
-
-This means invalid records do not have to simply disappear.
-
-They can be isolated with the information needed to understand why they were rejected.
 
 So the DQ stage solves a different problem from Silver.
 
