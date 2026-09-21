@@ -676,9 +676,13 @@ This is the event-driven part of the project that takes over after the historica
 
 # 5. 🗂️ Data Plane
 
-The data plane is responsible for processing the actual Backblaze data.
+The data plane is the part of the project that actually processes the Backblaze data.
 
-The data path is:
+The control plane decides **what file should be processed and when it should run**.
+
+The data plane is responsible for **reading that file, transforming it, validating it, and producing the final analytical data**.
+
+The main data flow is:
 
 ```text
 S3 RAW
@@ -692,7 +696,7 @@ Data Quality
 Gold
 ```
 
-The data plane uses:
+I use the following technologies in the data plane:
 
 ```text
 Amazon S3
@@ -701,36 +705,44 @@ Apache Spark
 Apache Iceberg
 AWS Glue Data Catalog
 Amazon Athena
-Amazon QuickSight for Dashboards
+Amazon QuickSight
 ```
 
-Each component has a specific responsibility.
+Each one solves a different problem.
 
-| Technology | Purpose |
-|---|---|
-| Amazon S3 | RAW source storage |
-| AWS Glue | Managed Spark execution |
-| Apache Spark | Distributed ETL processing |
-| Apache Iceberg | Lakehouse table format |
-| AWS Glue Data Catalog | Iceberg table catalog |
-| Amazon Athena | Querying and validation |
-| Amazon QuickSight | Gold-layer analytics and For Dashboards |
+| Technology | How I use it | What problem it solves |
+|---|---|---|
+| Amazon S3 | Stores the raw Backblaze files and lakehouse data | Durable and scalable storage |
+| AWS Glue | Runs the Spark jobs | Managed execution without maintaining Spark servers |
+| Apache Spark | Reads and transforms the data | Distributed processing for large datasets |
+| Apache Iceberg | Stores Bronze, Silver and Gold tables | Gives the S3 data a proper table structure |
+| Glue Data Catalog | Keeps track of Iceberg tables | Gives Spark and Athena a common table catalog |
+| Athena | Queries and validates the lakehouse | Lets me inspect and test the data with SQL |
+| QuickSight | Uses the analytical output | Provides the reporting and dashboard layer |
+
+The important point is that these services are not being used independently.
+
+They work together as one data-processing path.
 
 ---
 
 # 6. ☁️ Amazon S3
 
-I use Amazon S3 as the main storage layer Basically A S3 is our Data Lake. 
+I use Amazon S3 as the main storage layer.
 
-S3 stores the original Backblaze source files in the RAW zone.
+In this project, S3 is basically the data lake.
 
-The RAW location is:
+The first important responsibility of S3 is storing the original Backblaze files.
+
+The RAW path is:
 
 ```text
 raw/drivestats/
 ```
 
-The project also stores other lakehouse and deployment-related objects in S3:
+This is where the source files land before the processing layers use them.
+
+The project also uses S3 for other project objects such as:
 
 ```text
 glue_scripts/
@@ -741,21 +753,68 @@ architecture/
 dashboard/
 ```
 
-S3 is responsible for durable object storage.
+The most important part of the RAW layer is that the original source file remains available.
 
-It is also the event source for incremental processing.
+For example:
 
-The original source data remains available even when downstream processing fails.
+```text
+Backblaze CSV
+      ↓
+S3 RAW
+      ↓
+Bronze
+      ↓
+Silver
+```
+
+If something fails later:
+
+```text
+Silver ❌
+```
+
+or:
+
+```text
+Gold ❌
+```
+
+the original source file is still in S3.
+
+That means I can investigate the failure or process the source again without needing to download the source data again.
+
+S3 also plays another role in the project.
+
+It is the starting point of the incremental event-driven pipeline.
+
+When a new CSV is created under the configured RAW path, S3 generates the event that starts the control-plane workflow.
+
+So S3 has two important responsibilities here:
+
+```text
+1. Store the source data
+2. Generate the event when new data arrives
+```
 
 ---
 
 # 7. 🧱 Bronze Layer
 
-The Bronze layer is the first lakehouse processing layer.
+Bronze is the first processing layer after RAW.
 
-Its purpose is to ingest source data into the lakehouse while keeping it close to its original form.
+The purpose of Bronze is to bring the source data into the lakehouse without immediately mixing in all of the business logic.
 
-Bronze is focused on source ingestion and processing metadata rather than full business transformation.
+The idea is:
+
+```text
+RAW
+ ↓
+Bronze
+```
+
+Bronze stays close to the source representation.
+
+It also carries the processing metadata needed to understand where the data came from and which processing run created it.
 
 The historical Bronze job is:
 
@@ -776,17 +835,51 @@ The incremental job receives:
 --release_id
 ```
 
-The Bronze layer is stored using Apache Iceberg.
+The `--input_path` is important because the incremental pipeline is file-scoped.
+
+It tells Bronze:
+
+```text
+"Process this source file."
+```
+
+instead of:
+
+```text
+"Read everything under RAW."
+```
+
+Bronze is stored using Apache Iceberg.
+
+The main problem Bronze solves is creating a durable lakehouse representation of the source before applying the more controlled transformations in Silver.
+
+The basic responsibility is:
+
+```text
+S3 RAW
+   ↓
+Read Source
+   ↓
+Add Processing Metadata
+   ↓
+Bronze Iceberg Table
+```
 
 ---
 
 # 8. 🧹 Silver Layer
 
-The Silver layer is the controlled transformation layer.
+Silver is where the source-oriented Bronze data is turned into a controlled structure for downstream use.
 
-Silver is responsible for cleaning and standardizing the source data.
+The flow is:
 
-This is also where the project handles differences between source schemas and the canonical structure required by the lakehouse.
+```text
+Bronze
+   ↓
+Silver
+```
+
+This is where the project applies the canonical transformation logic.
 
 The historical Silver job is:
 
@@ -800,7 +893,49 @@ The incremental Silver job is:
 silver_layer
 ```
 
-The Silver layer is stored using Apache Iceberg.
+For incremental processing it receives:
+
+```text
+--input_path
+--release_id
+```
+
+Silver handles the things that should not be pushed into the source-oriented Bronze layer.
+
+This includes areas such as:
+
+```text
+Column mapping
+Type casting
+Required-field handling
+Deduplication
+Canonical schema handling
+Schema differences between releases
+```
+
+The important reason for doing this in Silver is that the Backblaze source structure is not guaranteed to remain exactly the same across all releases.
+
+I therefore use:
+
+```text
+Source Structure
+      ↓
+Bronze
+      ↓
+Canonical Transformation
+      ↓
+Silver
+```
+
+That gives downstream layers a more consistent structure to work with.
+
+The main problem Silver solves is:
+
+```text
+How do I take changing source data
+and turn it into a controlled structure
+that the rest of the pipeline can use?
+```
 
 ---
 
@@ -808,33 +943,73 @@ The Silver layer is stored using Apache Iceberg.
 
 The project has a separate Data Quality stage.
 
-Validation logic is not mixed entirely into the transformation jobs.
+I kept Data Quality separate from the main transformation logic because:
 
-The historical Data Quality job is:
+```text
+A job completing successfully
+does not automatically mean
+the data is correct.
+```
+
+The historical DQ job is:
 
 ```text
 data_quality_check
 ```
 
-The incremental Data Quality job is:
+The incremental DQ job is:
 
 ```text
 data_quality_layer
 ```
 
-This stage validates the processed data before it reaches Gold.
+The stage runs after Silver:
 
-The project also contains quarantine handling for records that fail validation.
+```text
+Silver
+   ↓
+Data Quality
+   ↓
+Gold
+```
 
-Invalid records can therefore be isolated instead of silently disappearing from the pipeline.
+The DQ stage checks the processed dataset against the required quality rules.
+
+The project also includes quarantine handling.
+
+This means invalid records do not have to simply disappear.
+
+They can be isolated with the information needed to understand why they were rejected.
+
+So the DQ stage solves a different problem from Silver.
+
+```text
+Silver
+→ "Can I transform and standardize this data?"
+
+Data Quality
+→ "Is the resulting data acceptable for downstream use?"
+```
+
+This gives the pipeline an explicit quality checkpoint before Gold.
 
 ---
 
 # 10. 🏆 Gold Layer
 
-The Gold layer is the analytical layer.
+Gold is the final analytical layer of the lakehouse.
 
-The Gold layer contains data prepared for analytical use rather than raw ingestion.
+The flow is:
+
+```text
+Bronze
+   ↓
+Silver
+   ↓
+Data Quality
+   ↓
+Gold
+```
 
 The historical Gold job is:
 
@@ -848,7 +1023,23 @@ The incremental Gold job is:
 gold_analytics_layer
 ```
 
-Gold is the output consumed by the analytical layer.
+By the time the data reaches Gold, the major source-handling work has already happened.
+
+The Gold layer can therefore focus on producing data that is easier to use for analytics.
+
+The purpose is no longer:
+
+```text
+"Keep the source data."
+```
+
+The purpose is:
+
+```text
+"Produce useful analytical data."
+```
+
+The Gold layer is then consumed by the analytical side of the project.
 
 ---
 
@@ -856,9 +1047,7 @@ Gold is the output consumed by the analytical layer.
 
 I use Apache Iceberg as the table format for the lakehouse.
 
-The project does not treat the lakehouse as a collection of unrelated files.
-
-Iceberg provides the table abstraction over the underlying S3 storage.
+The important difference is that I am not treating the lakehouse as just a collection of Parquet files sitting in S3.
 
 The architecture is:
 
@@ -872,7 +1061,13 @@ AWS Glue Data Catalog
 Apache Spark
 ```
 
-The lakehouse tables are organized into:
+S3 stores the underlying data.
+
+Iceberg provides the table abstraction over that storage.
+
+That allows the project to work with proper lakehouse tables instead of manually managing files as if they were database tables.
+
+The main processing layers are:
 
 ```text
 Bronze
@@ -880,31 +1075,58 @@ Silver
 Gold
 ```
 
-Iceberg is used to provide managed analytical tables while keeping the underlying storage in S3.
+All three are represented as lakehouse tables using Iceberg.
+
+So the roles are separated:
+
+```text
+S3
+→ Stores the physical data
+
+Iceberg
+→ Defines the table structure and table state
+
+Glue Data Catalog
+→ Makes those tables discoverable
+
+Spark / Athena
+→ Read and work with the tables
+```
+
+This solves one of the main problems of building a lakehouse on object storage:
+
+```text
+How do I turn files in S3
+into tables that data tools can reliably work with?
+```
 
 ---
 
 # 12. ⚙️ Apache Spark and AWS Glue
 
-I use Apache Spark for distributed data processing.
+I use Apache Spark for the actual distributed data processing.
 
 I run Spark through AWS Glue.
 
-AWS Glue provides the managed execution environment while Spark performs the distributed transformations.
+That means I do not have to manage my own Spark cluster just to run these ETL jobs.
 
-The processing flow is:
+The relationship is:
 
 ```text
 AWS Glue
-    ↓
+   ↓
 Apache Spark
-    ↓
+   ↓
 Process Data
-    ↓
+   ↓
 Apache Iceberg
 ```
 
-The Glue jobs are separated according to the lakehouse stages:
+Glue provides the managed execution environment.
+
+Spark performs the actual distributed processing.
+
+The project separates the processing into different jobs:
 
 ```text
 Bronze
@@ -913,295 +1135,116 @@ Data Quality
 Gold
 ```
 
-Each stage is therefore independently controlled by the orchestration layer.
+That separation is important because each stage has a different responsibility.
+
+It also allows Step Functions to control the stages independently.
+
+For example:
+
+```text
+Bronze succeeds
+      ↓
+Start Silver
+```
+
+If Silver fails:
+
+```text
+Silver ❌
+      ↓
+Do not continue blindly to Gold
+```
+
+So Glue is the compute layer.
+
+Spark is the processing engine.
+
+Iceberg is the table layer.
 
 ---
 
-# 13. 🎛️ Control Plane
+# 13. 🔗 How the Data Plane Connects Together
 
-The control plane manages the processing workflow.
+The data plane is not a collection of unrelated jobs.
 
-The control plane is:
-
-```text
-S3 ObjectCreated
-        ↓
-SQS
-        ↓
-Lambda
-        ↓
-DynamoDB
-        ↓
-Step Functions
-        ↓
-Glue
-```
-
-The control plane does not perform the main Spark transformations.
-
-It manages the work around those transformations.
-
-The control plane is responsible for:
+The output of one stage becomes the input to the next stage.
 
 ```text
-Event handling
-File registration
-Processing state
-Processing ownership
-Workflow orchestration
-Failure handling
-Resume handling
-Glue execution
-```
-
----
-
-# 14. 📨 Amazon SQS
-
-I use Amazon SQS between S3 and Lambda.
-
-The main queue is:
-
-```text
-backblaze-dev-s3-events
-```
-
-The project also has a dead-letter queue:
-
-```text
-backblaze-dev-s3-events-dlq
-```
-
-SQS provides the buffer between the event producer and the event consumer.
-
-This separates S3 event generation from Lambda processing.
-
-SQS also provides a retry boundary.
-
-Messages that cannot be processed successfully after the configured retry behavior can move to the DLQ.
-
----
-
-# 15. 🔧 AWS Lambda
-
-I use Lambda as the S3 event handler.
-
-The Lambda function is:
-
-```text
-backblaze-dev-s3-event-handler
-```
-
-Lambda does not execute Spark.
-
-Its responsibility is control-plane processing.
-
-The Lambda:
-
-```text
-Receives the SQS event
-        ↓
-Reads the S3 event
-        ↓
-Validates the bucket and RAW prefix
-        ↓
-Decodes the S3 object key
-        ↓
-Extracts release and source information
-        ↓
-Captures file metadata
-        ↓
-Registers the source file in DynamoDB
-        ↓
-Starts Step Functions
-```
-
-The Lambda captures metadata such as:
-
-```text
-source_file
-size
-etag
-event_name
-event_time
-received_at
-release_id
-```
-
-The file registration is designed to be duplicate-safe.
-
-Lambda does not own the entire workflow.
-
-Its responsibility is event handling and workflow initiation.
-
----
-
-# 16. 🗄️ Amazon DynamoDB
-
-I use DynamoDB as the control-plane state store.
-
-The table is:
-
-```text
-backblaze-dev-pipeline-control
-```
-
-The project also uses the processing queue index:
-
-```text
-backblaze-processing-queue-index
-```
-
-DynamoDB stores pipeline state rather than analytical data.
-
-The lakehouse tables answer:
-
-```text
-"What data has been processed?"
-```
-
-DynamoDB answers:
-
-```text
-"What processing work exists?"
-"What is its current state?"
-"Which file is being processed?"
-"Can the file be claimed?"
-"Where should processing resume?"
-```
-
-This keeps operational pipeline state separate from the lakehouse data.
-
-The file registration uses conditional logic so duplicate event delivery does not automatically create duplicate processing records.
-
----
-
-# 17. 🔀 AWS Step Functions
-
-I use AWS Step Functions as the orchestration layer.
-
-The state machine is:
-
-```text
-backblaze-dev-file-processing
-```
-
-Step Functions controls the sequence of processing stages.
-
-The normal processing path is:
-
-```text
-Claim Processing Unit
-        ↓
-Run Bronze
-        ↓
-Run Silver
-        ↓
-Run Data Quality
-        ↓
-Run Gold
-        ↓
-Mark Processing Successful
-        ↓
-Release Processing State
-```
-
-The state machine also contains failure and resume paths.
-
-The project is designed around one active processing unit at a time.
-
-For the incremental pipeline, that processing unit is a source file.
-
-Step Functions coordinates the work rather than performing the transformations itself.
-
----
-
-# 18. 🔒 Processing Ownership
-
-The project uses DynamoDB and Step Functions together to control processing ownership.
-
-The pipeline maintains processing state so the workflow can determine whether processing is already active.
-
-The processing model is:
-
-```text
-One active processing unit
-        ↓
-Process that unit
-        ↓
-Complete or fail
-        ↓
-Release processing state
-        ↓
-Allow the next unit to run
-```
-
-This control state is separate from the data stored in Bronze, Silver, and Gold.
-
-The control plane therefore knows which processing unit currently owns the processing slot.
-
----
-
-# 19. 🔁 Failure and Resume Handling
-
-Failure handling is implemented in the orchestration layer.
-
-The state machine keeps track of the processing stage.
-
-The workflow distinguishes between:
-
-```text
-A new processing request
-```
-
-and:
-
-```text
-A processing unit that already exists
-but previously failed
-```
-
-The Step Functions workflow checks existing pipeline state and failed-file state before deciding which stage should run.
-
-This allows the pipeline to resume processing instead of treating every retry as an entirely new piece of work.
-
-The processing stages remain separate:
-
-```text
+S3 RAW
+   ↓
 Bronze
+   ↓
 Silver
+   ↓
 Data Quality
+   ↓
 Gold
 ```
 
-The orchestration layer can therefore determine where processing needs to continue.
+Each stage has a reason.
+
+```text
+RAW
+→ Keep the original source
+
+Bronze
+→ Ingest the source into the lakehouse
+
+Silver
+→ Standardize and transform the data
+
+Data Quality
+→ Check whether the processed data is acceptable
+
+Gold
+→ Produce analytical data
+```
+
+The result is a controlled progression from source data to analytical data.
 
 ---
 
-# 20. 🔍 Amazon Athena
+# 14. 🔍 Amazon Athena
 
-I use Amazon Athena to query the Iceberg tables.
+I use Amazon Athena to query the lakehouse tables.
 
-Athena is used for:
+Athena is especially useful during validation because I can inspect the actual data after a Glue job finishes.
+
+For example, I use Athena for:
 
 ```text
-Data validation
-Row-count verification
-Schema verification
+Row-count checks
+Schema checks
 Release validation
 Data Quality inspection
-Gold-layer analysis
+Bronze validation
+Silver validation
+Gold analysis
 ```
 
-Athena provides a query interface over the lakehouse tables without requiring a separate database server.
+This gives me a way to answer questions such as:
+
+```text
+Did the expected data arrive?
+
+Did the transformation produce the expected rows?
+
+Does the table have the expected schema?
+
+Did the release finish correctly?
+
+Does Gold contain the expected analytical output?
+```
+
+Athena therefore acts as both a query layer and a validation tool in the project.
 
 ---
 
-# 21. 📊 Amazon QuickSight
+# 15. 📊 Amazon QuickSight
 
-I use Amazon QuickSight as the analytical consumption layer.
+I use Amazon QuickSight as the reporting and dashboard layer.
 
-The dashboard consumes processed analytical data from the Gold layer.
+The dashboard is built from the processed analytical data rather than directly from the RAW files.
 
 The overall path is:
 
@@ -1223,150 +1266,34 @@ Athena
 QuickSight
 ```
 
-The dashboard is therefore separated from the ingestion and transformation stages.
+This keeps the dashboard separate from ingestion and transformation.
+
+QuickSight is therefore not part of the ingestion pipeline itself.
+
+It is the consumption layer that sits after the Gold data has been prepared.
 
 ---
 
-# 22. 🔔 Amazon SNS
+# 16. 🎯 What the Data Plane Solves
 
-I created an SNS notification layer for pipeline notifications.
+The data plane solves the actual data problem.
 
-The SNS topic is:
+It takes:
 
 ```text
-backblaze-dev-pipeline-notifications
+Raw Backblaze Files
 ```
 
-SNS provides the notification infrastructure for pipeline alerts.
-
-At the current recorded project state, the SNS infrastructure exists, but notification states had not yet been added directly into the Step Functions state machine.
-
----
-
-# 23. 🏗️ Terraform
-
-I use Terraform for infrastructure as code.
-
-Terraform defines and manages AWS infrastructure instead of making the environment dependent on manual console configuration.
-
-The project infrastructure includes:
+and turns them into:
 
 ```text
-Amazon S3
-Amazon SQS
-SQS DLQ
-AWS Lambda
-Amazon DynamoDB
-AWS Step Functions
-AWS IAM
-Amazon SNS
+Validated Analytical Data
 ```
 
-The purpose of Terraform is to keep infrastructure configuration in source control and make the environment reproducible.
-
----
-
-# 24. 🚀 GitHub Actions
-
-I use GitHub Actions for CI/CD.
-
-The repository contains the application and infrastructure code.
-
-GitHub Actions automates deployment-related work instead of requiring manual uploads and configuration through the AWS console.
-
-The deployment flow is:
+The full path is:
 
 ```text
-GitHub
-   ↓
-GitHub Actions
-   ↓
-Build / Validate / Deploy
-   ↓
-AWS
-```
-
-Terraform manages infrastructure configuration while CI/CD handles the deployment workflow.
-
----
-
-# 25. 🧱 Complete Architecture
-
-```text
-                         BACKBLAZE
-                             │
-                             ▼
-                     ┌─────────────┐
-                     │   S3 RAW    │
-                     └──────┬──────┘
-                            │
-                    ObjectCreated
-                            │
-                            ▼
-                     ┌─────────────┐
-                     │     SQS     │
-                     └──────┬──────┘
-                            │
-                            ▼
-                     ┌─────────────┐
-                     │   Lambda    │
-                     └──────┬──────┘
-                            │
-                            ▼
-                     ┌─────────────┐
-                     │  DynamoDB   │
-                     │ Control     │
-                     │    State    │
-                     └──────┬──────┘
-                            │
-                            ▼
-                  ┌────────────────────┐
-                  │   Step Functions   │
-                  │    Orchestrator    │
-                  └─────────┬──────────┘
-                            │
-                            ▼
-                     ┌─────────────┐
-                     │ AWS Glue +  │
-                     │ Apache Spark│
-                     └──────┬──────┘
-                            │
-             ┌──────────────┼──────────────┐
-             │              │              │
-             ▼              ▼              ▼
-          Bronze         Silver       Data Quality
-             │              │              │
-             └──────────────┼──────────────┘
-                            │
-                            ▼
-                          Gold
-                            │
-                       ┌────┴────┐
-                       │         │
-                       ▼         ▼
-                    Athena   QuickSight
-```
-
-## Control Plane
-
-```text
-S3
- ↓
-SQS
- ↓
-Lambda
- ↓
-DynamoDB
- ↓
-Step Functions
- ↓
-Glue
-```
-
-## Data Plane
-
-```text
-S3 RAW
+RAW
  ↓
 Bronze
  ↓
@@ -1377,6 +1304,25 @@ Data Quality
 Gold
 ```
 
-The control plane manages the lifecycle of the processing unit.
+Each layer removes a different problem.
 
-The data plane performs the actual data engineering work.
+```text
+RAW
+→ Source storage
+
+Bronze
+→ Durable ingestion
+
+Silver
+→ Standardization and transformation
+
+Data Quality
+→ Validation
+
+Gold
+→ Analytical output
+```
+
+This is the main purpose of the data plane.
+
+The control plane will handle the question of **when and how this processing should run**.
