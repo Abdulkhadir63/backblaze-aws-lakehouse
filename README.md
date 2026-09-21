@@ -1,13 +1,12 @@
-#BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT
+# **BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT**
 
 <p align="center">
-  <img src="https://cdn.simpleicons.org/amazonaws" width="58" alt="AWS"/>
-  <img src="https://cdn.simpleicons.org/python" width="58" alt="Python"/>
-  <img src="https://cdn.simpleicons.org/apacheiceberg" width="58" alt="Apache Iceberg"/>
-  <img src="https://cdn.simpleicons.org/amazons3" width="58" alt="Amazon S3"/>
-  <img src="https://cdn.simpleicons.org/amazonwebservices" width="58" alt="AWS"/>
-  <img src="https://cdn.simpleicons.org/terraform" width="58" alt="Terraform"/>
-  <img src="https://cdn.simpleicons.org/githubactions" width="58" alt="GitHub Actions"/>
+  <img src="https://cdn.simpleicons.org/amazonwebservices/FF9900" width="58" alt="AWS"/>
+  <img src="https://cdn.simpleicons.org/python/3776AB" width="58" alt="Python"/>
+  <img src="https://cdn.simpleicons.org/apacheiceberg/000000" width="58" alt="Apache Iceberg"/>
+  <img src="https://cdn.simpleicons.org/amazonaws/569A31" width="58" alt="Amazon S3"/>
+  <img src="https://cdn.simpleicons.org/terraform/844FBA" width="58" alt="Terraform"/>
+  <img src="https://cdn.simpleicons.org/githubactions/2088FF" width="58" alt="GitHub Actions"/>
 </p>
 
 <p align="center">
