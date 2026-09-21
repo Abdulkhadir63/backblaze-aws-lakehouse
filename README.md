@@ -3672,27 +3672,19 @@ The project is therefore not dependent on manually rebuilding the environment fr
 
 <!-- :contentReference[oaicite:0]{index=0} -->
 ---
-<p align="center">
-  <h2>🌟 About Me</h2>
-  Hi there! I'm <b>Abdul Khadir</b>, a Diploma in Computer Science Engineering graduate on a mission to become a Data Engineer!
-</p>
+<div align="center">
 
-<br/>
+## 🌟 About Me
+Hi there! I'm **Abdul Khadir**, a Diploma in Computer Science Engineering graduate on a mission to become a Data Engineer!
 
-<p align="center">
-  <h2>📬 Connect With Me</h2>
-  If you'd like to discuss Data Engineering, share feedback, or simply connect, feel free to reach out!
-</p>
+---
 
-<p align="center">
-  <a href="https://www.linkedin.com/in/abdul-khadir-44876735a" target="_blank">
-    <img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
-  </a>
-  &nbsp;&nbsp;
-  <a href="https://www.instagram.com/abdulkm_63" target="_blank">
-    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram"/>
-  </a>
-</p>
+## 📬 Connect With Me
+If you'd like to discuss Data Engineering, share feedback, or simply connect, feel free to reach out.
+
+[LinkedIn](https://www.linkedin.com/in/abdul-khadir-44876735a) • [Instagram](https://www.instagram.com/abdulkm_63)
+
+</div>
 
 
 
