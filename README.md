@@ -50,77 +50,21 @@
 
 </tr>
 
-<tr>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon SQS" width="42" height="42"/><br/>
-<sub><b>Amazon SQS</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="AWS Lambda" width="42" height="42"/><br/>
-<sub><b>AWS Lambda</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon DynamoDB" width="42" height="42"/><br/>
-<sub><b>DynamoDB</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="AWS Step Functions" width="42" height="42"/><br/>
-<sub><b>Step Functions</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="AWS Glue" width="42" height="42"/><br/>
-<sub><b>AWS Glue</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon Athena" width="42" height="42"/><br/>
-<sub><b>Amazon Athena</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon QuickSight" width="42" height="42"/><br/>
-<sub><b>QuickSight</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon SNS" width="42" height="42"/><br/>
-<sub><b>Amazon SNS</b></sub>
-</td>
-
-</tr>
-<tr>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon CloudWatch" width="42" height="42"/><br/>
-<sub><b>CloudWatch</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/python" alt="Python" width="42" height="42"/><br/>
-<sub><b>Python</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/github" alt="GitHub" width="42" height="42"/><br/>
-<sub><b>GitHub</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/apache" alt="Apache" width="42" height="42"/><br/>
-<sub><b>Apache</b></sub>
-</td>
-
-<td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon S3" width="42" height="42"/><br/>
-<sub><b>S3</b></sub>
-</td>
-
-</tr>
+<p align="center">
+  <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white" alt="S3"/>
+  <img src="https://img.shields.io/badge/AWS_SQS-FF4F8B?style=for-the-badge&logo=amazonsqs&logoColor=white" alt="SQS"/>
+  <img src="https://img.shields.io/badge/AWS_Lambda-FF9900?style=for-the-badge&logo=awslambda&logoColor=white" alt="Lambda"/>
+  <img src="https://img.shields.io/badge/DynamoDB-4053D6?style=for-the-badge&logo=amazondynamodb&logoColor=white" alt="DynamoDB"/>
+  <img src="https://img.shields.io/badge/AWS_Step_Functions-FF4F8B?style=for-the-badge&logo=awsstepfunctions&logoColor=white" alt="Step Functions"/>
+  <img src="https://img.shields.io/badge/AWS_Glue-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="Glue"/>
+  <br/>
+  <img src="https://img.shields.io/badge/Amazon_Athena-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="Athena"/>
+  <img src="https://img.shields.io/badge/QuickSight-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="QuickSight"/>
+  <img src="https://img.shields.io/badge/Amazon_SNS-FF4F8B?style=for-the-badge&logo=amazonsns&logoColor=white" alt="SNS"/>
+  <img src="https://img.shields.io/badge/CloudWatch-FF4F8B?style=for-the-badge&logo=amazoncloudwatch&logoColor=white" alt="CloudWatch"/>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/Apache_Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white" alt="Apache Spark"/>
+</p>
 
 </table>
 </p>
