@@ -39,40 +39,12 @@
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/terraform/terraform-original.svg" alt="Terraform" width="42" height="42"/><br/>
         <sub><b>Terraform</b></sub>
       </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/amazonsqs" alt="Amazon SQS" width="42" height="42"/><br/>
-        <sub><b>Amazon SQS</b></sub>
-      </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/awslambda" alt="AWS Lambda" width="42" height="42"/><br/>
-        <sub><b>AWS Lambda</b></sub>
-      </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/amazondynamodb" alt="Amazon DynamoDB" width="42" height="42"/><br/>
-        <sub><b>Amazon DynamoDB</b></sub>
-      </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/awsstepfunctions" alt="AWS Step Functions" width="42" height="42"/><br/>
-        <sub><b>Step Functions</b></sub>
-      </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/awsglue" alt="AWS Glue" width="42" height="42"/><br/>
-        <sub><b>AWS Glue</b></sub>
-      </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/amazonathena" alt="Amazon Athena" width="42" height="42"/><br/>
-        <sub><b>Amazon Athena</b></sub>
-      </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/amazonquicksight" alt="Amazon QuickSight" width="42" height="42"/><br/>
-        <sub><b>QuickSight</b></sub>
-      </td>
-      <td align="center" width="95">
-        <img src="https://cdn.simpleicons.org/amazonsns" alt="Amazon SNS" width="42" height="42"/><br/>
-        <sub><b>Amazon SNS</b></sub>
-      </td>
     </tr>
   </table>
+</p>
+<p align="center">
+  <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
+  Historical backfill • Event-driven incremental ingestion • Apache Iceberg • AWS Glue • Lambda • SQS • DynamoDB • Step Functions • Terraform • GitHub Actions
 </p>
 
 <p align="center">
