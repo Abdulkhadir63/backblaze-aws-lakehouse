@@ -1,4 +1,8 @@
-<h1 align="center">BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT</h1>
+<h1 align="center">
+  <img src="https://cdn.simpleicons.org/backblaze" width="28" height="28" alt="Backblaze"/>
+  &nbsp;BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT&nbsp;
+  <img src="https://cdn.simpleicons.org/backblaze" width="28" height="28" alt="Backblaze"/>
+</h1>
 
 <p align="center">
   <table>
