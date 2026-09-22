@@ -60,11 +60,6 @@ Historical backfill • Event-driven incremental ingestion • Apache Iceberg �
 
 <br/>
 
-<p align="center">
-<img src="./architecture/project-architecture.svg" alt="Backblaze AWS Lakehouse Architecture" width="100%"/>
-</p>
-
-
   <p align="center">
   <a href="DEPLOYMENT.md">📚 Deployment Runbook</a>
   •
