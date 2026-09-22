@@ -53,51 +53,50 @@
 <tr>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonsqs" alt="Amazon SQS" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon SQS" width="42" height="42"/><br/>
 <sub><b>Amazon SQS</b></sub>
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/awslambda" alt="AWS Lambda" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="AWS Lambda" width="42" height="42"/><br/>
 <sub><b>AWS Lambda</b></sub>
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazondynamodb" alt="Amazon DynamoDB" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon DynamoDB" width="42" height="42"/><br/>
 <sub><b>DynamoDB</b></sub>
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/awsstepfunctions" alt="AWS Step Functions" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="AWS Step Functions" width="42" height="42"/><br/>
 <sub><b>Step Functions</b></sub>
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/awsglue" alt="AWS Glue" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="AWS Glue" width="42" height="42"/><br/>
 <sub><b>AWS Glue</b></sub>
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonathena" alt="Amazon Athena" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon Athena" width="42" height="42"/><br/>
 <sub><b>Amazon Athena</b></sub>
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonquicksight" alt="Amazon QuickSight" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon QuickSight" width="42" height="42"/><br/>
 <sub><b>QuickSight</b></sub>
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazonsns" alt="Amazon SNS" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon SNS" width="42" height="42"/><br/>
 <sub><b>Amazon SNS</b></sub>
 </td>
 
 </tr>
-
 <tr>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazoncloudwatch" alt="Amazon CloudWatch" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon CloudWatch" width="42" height="42"/><br/>
 <sub><b>CloudWatch</b></sub>
 </td>
 
@@ -117,7 +116,7 @@
 </td>
 
 <td align="center" width="95">
-<img src="https://cdn.simpleicons.org/amazons3" alt="Amazon S3" width="42" height="42"/><br/>
+<img src="https://cdn.simpleicons.org/amazonaws" alt="Amazon S3" width="42" height="42"/><br/>
 <sub><b>S3</b></sub>
 </td>
 
