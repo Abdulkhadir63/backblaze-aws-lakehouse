@@ -11,7 +11,7 @@
   •
   <a href="architecture/project architecuture.svg">🏗️ Architecture</a>
   •
-  <a href="stepfunctions/backblaze_file_processing.asl.json">⚙️ Step Functions</a>
+  <a href="dashboard/QuickSight.png">📊 Dashboards</a>
 </p>
 ---
 
