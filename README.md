@@ -4,10 +4,15 @@
   <img src="https://cdn.simpleicons.org/backblaze" width="28" height="28" alt="Backblaze"/>
 </h1>
 
-<p align="center">
+<h1 align="center">
+  <img src="https://img.shields.io/badge/Backblaze-E11B22?style=for-the-badge&logo=backblaze&logoColor=white" alt="Backblaze" height="30"/>
+  BACKBLAZE AWS MODERN DATA LAKEHOUSE PROJECT
+  <img src="https://img.shields.io/badge/Backblaze-E11B22?style=for-the-badge&logo=backblaze&logoColor=white" alt="Backblaze" height="30"/>
+</h1>
+
+<div align="center">
   <table>
     <tr>
-
       <td align="center" width="95">
         <img src="https://img.shields.io/badge/Backblaze-E11B22?style=for-the-badge&logo=backblaze&logoColor=white" alt="Backblaze" height="32"/><br/>
         <sub><b>Backblaze</b></sub>
@@ -49,48 +54,47 @@
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_App-Integration/48/Arch_Amazon-Simple-Queue-Service_48.svg" alt="Amazon SQS" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/Amazon_SQS-FF4F8B?style=for-the-badge" alt="Amazon SQS" height="32"/><br/>
         <sub><b>Amazon SQS</b></sub>
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Compute/48/Arch_AWS-Lambda_48.svg" alt="AWS Lambda" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/AWS_Lambda-FF9900?style=for-the-badge" alt="AWS Lambda" height="32"/><br/>
         <sub><b>AWS Lambda</b></sub>
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Database/48/Arch_Amazon-DynamoDB_48.svg" alt="Amazon DynamoDB" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/Amazon_DynamoDB-4053D6?style=for-the-badge" alt="Amazon DynamoDB" height="32"/><br/>
         <sub><b>Amazon DynamoDB</b></sub>
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_App-Integration/48/Arch_AWS-Step-Functions_48.svg" alt="AWS Step Functions" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/AWS_Step_Functions-FF4F8B?style=for-the-badge" alt="AWS Step Functions" height="32"/><br/>
         <sub><b>Step Functions</b></sub>
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Analytics/48/Arch_AWS-Glue_48.svg" alt="AWS Glue" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/AWS_Glue-8C4FFF?style=for-the-badge" alt="AWS Glue" height="32"/><br/>
         <sub><b>AWS Glue</b></sub>
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Analytics/48/Arch_Amazon-Athena_48.svg" alt="Amazon Athena" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/Amazon_Athena-8C4FFF?style=for-the-badge" alt="Amazon Athena" height="32"/><br/>
         <sub><b>Amazon Athena</b></sub>
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Analytics/48/Arch_Amazon-QuickSight_48.svg" alt="Amazon QuickSight" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/Amazon_QuickSight-8C4FFF?style=for-the-badge" alt="Amazon QuickSight" height="32"/><br/>
         <sub><b>QuickSight</b></sub>
       </td>
 
       <td align="center" width="95">
-        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_App-Integration/48/Arch_Amazon-Simple-Notification-Service_48.svg" alt="Amazon SNS" width="42" height="42"/><br/>
+        <img src="https://img.shields.io/badge/Amazon_SNS-FF4F8B?style=for-the-badge" alt="Amazon SNS" height="32"/><br/>
         <sub><b>Amazon SNS</b></sub>
       </td>
-
     </tr>
   </table>
-</p>
+</div>
 
 <p align="center">
   <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
