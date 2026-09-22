@@ -1941,7 +1941,7 @@ Step Functions sits between the control state and the Glue processing jobs.
 The control flow is:
 
   <img
-    src="architecture/=stepfunctions_graph.png"
+    src="architecture/stepfunctions_graph.png"
     width="100%"
     alt="Backblaze AWS Lakehouse Architecture"
   />
