@@ -50,22 +50,6 @@
 
 </tr>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white" alt="S3"/>
-  <img src="https://img.shields.io/badge/AWS_SQS-FF4F8B?style=for-the-badge&logo=amazonsqs&logoColor=white" alt="SQS"/>
-  <img src="https://img.shields.io/badge/AWS_Lambda-FF9900?style=for-the-badge&logo=awslambda&logoColor=white" alt="Lambda"/>
-  <img src="https://img.shields.io/badge/DynamoDB-4053D6?style=for-the-badge&logo=amazondynamodb&logoColor=white" alt="DynamoDB"/>
-  <img src="https://img.shields.io/badge/AWS_Step_Functions-FF4F8B?style=for-the-badge&logo=awsstepfunctions&logoColor=white" alt="Step Functions"/>
-  <img src="https://img.shields.io/badge/AWS_Glue-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="Glue"/>
-  <br/>
-  <img src="https://img.shields.io/badge/Amazon_Athena-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="Athena"/>
-  <img src="https://img.shields.io/badge/QuickSight-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="QuickSight"/>
-  <img src="https://img.shields.io/badge/Amazon_SNS-FF4F8B?style=for-the-badge&logo=amazonsns&logoColor=white" alt="SNS"/>
-  <img src="https://img.shields.io/badge/CloudWatch-FF4F8B?style=for-the-badge&logo=amazoncloudwatch&logoColor=white" alt="CloudWatch"/>
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/Apache_Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white" alt="Apache Spark"/>
-</p>
-
 </table>
 </p>
 
