@@ -11,49 +11,84 @@
         <img src="https://img.shields.io/badge/Backblaze-E11B22?style=for-the-badge&logo=backblaze&logoColor=white" alt="Backblaze" height="32"/><br/>
         <sub><b>Backblaze</b></sub>
       </td>
+
       <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg" alt="Apache Spark" width="42" height="42"/><br/>
         <sub><b>Apache Spark</b></sub>
       </td>
+
       <td align="center" width="95">
-       <img src="https://img.shields.io/badge/Apache%20Iceberg-008080?style=for-the-badge&logo=apache&logoColor=white" alt="Apache Iceberg" height="52"/><br/>
+        <img src="https://img.shields.io/badge/Apache%20Iceberg-008080?style=for-the-badge&logo=apache&logoColor=white" alt="Apache Iceberg" height="52"/><br/>
         <sub><b>Apache Iceberg</b></sub>
       </td>
+
       <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" width="48" height="48"/><br/>
         <sub><b>AWS</b></sub>
       </td>
+
       <td align="center" width="95">
-        <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white" alt="Amazon S3" height="32"/><br/>
+        <img src="https://img.shields.io/badge/Amazon%20S3-569A31?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Amazon S3" height="32"/><br/>
         <sub><b>Amazon S3</b></sub>
       </td>
+
       <td align="center" width="95">
         <img src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg" alt="AWS IAM" width="42" height="42"/><br/>
         <sub><b>AWS IAM</b></sub>
       </td>
+
       <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg" alt="GitHub Actions" width="42" height="42"/><br/>
         <sub><b>GitHub Actions</b></sub>
       </td>
+
       <td align="center" width="95">
         <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/terraform/terraform-original.svg" alt="Terraform" width="42" height="42"/><br/>
         <sub><b>Terraform</b></sub>
       </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Amazon%20SQS-FF4F8B?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Amazon SQS" height="32"/><br/>
+        <sub><b>Amazon SQS</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/AWS%20Lambda-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS Lambda" height="32"/><br/>
+        <sub><b>AWS Lambda</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Amazon%20DynamoDB-4053D6?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Amazon DynamoDB" height="32"/><br/>
+        <sub><b>Amazon DynamoDB</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/AWS%20Step%20Functions-FF4F8B?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS Step Functions" height="32"/><br/>
+        <sub><b>Step Functions</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/AWS%20Glue-8C4FFF?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS Glue" height="32"/><br/>
+        <sub><b>AWS Glue</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Amazon%20Athena-8C4FFF?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Amazon Athena" height="32"/><br/>
+        <sub><b>Amazon Athena</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Amazon%20QuickSight-8C4FFF?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Amazon QuickSight" height="32"/><br/>
+        <sub><b>QuickSight</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Amazon%20SNS-FF4F8B?style=for-the-badge&logo=amazonaws&logoColor=white" alt="Amazon SNS" height="32"/><br/>
+        <sub><b>Amazon SNS</b></sub>
+      </td>
     </tr>
   </table>
 </p>
-<p align="center">
-  <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
-  Historical backfill • Event-driven incremental ingestion • Apache Iceberg • AWS Glue • Lambda • SQS • DynamoDB • Step Functions • Terraform • GitHub Actions
-</p>
-
-<p align="center">
-  <a href="DEPLOYMENT.md">📚 Deployment Runbook</a> •
-  <a href="architecture/project architecuture.svg">🏗️ Architecture</a> •
-  <a href="dashboard/QuickSight.png">📊 Dashboard</a> •
-   <a href="docs/cost_analysis.png">💸 Project Cost Analysis</a>
-</p>
-
 ---
 
 <h2 align="center">Lets Talk About What I Built</h2>
