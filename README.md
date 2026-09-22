@@ -12,6 +12,8 @@
   <a href="architecture/project architecuture.svg">🏗️ Architecture</a>
   •
   <a href="dashboard/QuickSight.png">📊 Dashboards</a>
+  •
+  <a href="docs/cost_analysis.png">💸Cost Analysis of This Project</a>
 </p>
 ---
 
