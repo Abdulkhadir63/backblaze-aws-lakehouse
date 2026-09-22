@@ -4,7 +4,98 @@
   <img src="https://cdn.simpleicons.org/backblaze" width="28" height="28" alt="Backblaze"/>
 </h1>
 
-<p align="center"> <table> <tr> <td align="center" width="95"> <img src="https://img.shields.io/badge/Backblaze-E11B22?style=for-the-badge&logo=backblaze&logoColor=white" alt="Backblaze" height="32"/><br/> <sub><b>Backblaze</b></sub> </td> <td align="center" width="95"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg" alt="Apache Spark" width="42" height="42"/><br/> <sub><b>Apache Spark</b></sub> </td> <td align="center" width="95"> <img src="https://img.shields.io/badge/Apache%20Iceberg-008080?style=for-the-badge&logo=apache&logoColor=white" alt="Apache Iceberg" height="52"/><br/> <sub><b>Apache Iceberg</b></sub> </td> <td align="center" width="95"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" width="48" height="48"/><br/> <sub><b>AWS</b></sub> </td> <td align="center" width="95"> <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white" alt="Amazon S3" height="32"/><br/> <sub><b>Amazon S3</b></sub> </td> <td align="center" width="95"> <img src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg" alt="AWS IAM" width="42" height="42"/><br/> <sub><b>AWS IAM</b></sub> </td> <td align="center" width="95"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg" alt="GitHub Actions" width="42" height="42"/><br/> <sub><b>GitHub Actions</b></sub> </td> <td align="center" width="95"> <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/terraform/terraform-original.svg" alt="Terraform" width="42" height="42"/><br/> <sub><b>Terraform</b></sub> </td> </tr> </table> </p> <p align="center"> <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/> Historical backfill • Event-driven incremental ingestion • Apache Iceberg • AWS Glue • Lambda • SQS • DynamoDB • Step Functions • Terraform • GitHub Actions </p>
+<p align="center">
+  <table>
+    <tr>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Backblaze-E11B22?style=for-the-badge&logo=backblaze&logoColor=white" alt="Backblaze" height="32"/><br/>
+        <sub><b>Backblaze</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachespark/apachespark-original.svg" alt="Apache Spark" width="42" height="42"/><br/>
+        <sub><b>Apache Spark</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Apache%20Iceberg-008080?style=for-the-badge&logo=apache&logoColor=white" alt="Apache Iceberg" height="52"/><br/>
+        <sub><b>Apache Iceberg</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS" width="48" height="48"/><br/>
+        <sub><b>AWS</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://img.shields.io/badge/Amazon_S3-569A31?style=for-the-badge&logo=amazon-s3&logoColor=white" alt="Amazon S3" height="32"/><br/>
+        <sub><b>Amazon S3</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg" alt="AWS IAM" width="42" height="42"/><br/>
+        <sub><b>AWS IAM</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/githubactions/githubactions-original.svg" alt="GitHub Actions" width="42" height="42"/><br/>
+        <sub><b>GitHub Actions</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/terraform/terraform-original.svg" alt="Terraform" width="42" height="42"/><br/>
+        <sub><b>Terraform</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_App-Integration/48/Arch_Amazon-Simple-Queue-Service_48.svg" alt="Amazon SQS" width="42" height="42"/><br/>
+        <sub><b>Amazon SQS</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Compute/48/Arch_AWS-Lambda_48.svg" alt="AWS Lambda" width="42" height="42"/><br/>
+        <sub><b>AWS Lambda</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Database/48/Arch_Amazon-DynamoDB_48.svg" alt="Amazon DynamoDB" width="42" height="42"/><br/>
+        <sub><b>Amazon DynamoDB</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_App-Integration/48/Arch_AWS-Step-Functions_48.svg" alt="AWS Step Functions" width="42" height="42"/><br/>
+        <sub><b>Step Functions</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Analytics/48/Arch_AWS-Glue_48.svg" alt="AWS Glue" width="42" height="42"/><br/>
+        <sub><b>AWS Glue</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Analytics/48/Arch_Amazon-Athena_48.svg" alt="Amazon Athena" width="42" height="42"/><br/>
+        <sub><b>Amazon Athena</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_Analytics/48/Arch_Amazon-QuickSight_48.svg" alt="Amazon QuickSight" width="42" height="42"/><br/>
+        <sub><b>QuickSight</b></sub>
+      </td>
+
+      <td align="center" width="95">
+        <img src="https://raw.githubusercontent.com/icacho-dev/aws-architecture-icons/main/Architecture-Service-Icons_02072025/Arch_App-Integration/48/Arch_Amazon-Simple-Notification-Service_48.svg" alt="Amazon SNS" width="42" height="42"/><br/>
+        <sub><b>Amazon SNS</b></sub>
+      </td>
+
+    </tr>
+  </table>
+</p>
+
+<p align="center">
+  <b>Production-oriented AWS Lakehouse for Backblaze Drive Stats</b><br/>
+  Historical backfill • Event-driven incremental ingestion • Apache Iceberg • AWS Glue • Lambda • SQS • DynamoDB • Step Functions • Terraform • GitHub Actions
+</p>
 
 
 --------------------------------------------
