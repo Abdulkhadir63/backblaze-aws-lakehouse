@@ -5,7 +5,7 @@
 </h1>
 
 <p align="center">
-<table>
+<table align="center">
 <tr>
 
 <td align="center" width="95">
